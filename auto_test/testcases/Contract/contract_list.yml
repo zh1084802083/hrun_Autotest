@@ -1,0 +1,27 @@
+config:
+    name: 合同详情
+    variables:
+        access_token: ${get_token()}
+    verify: false
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 获取合同列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        params:
+          page: 0
+          size: 10
+          archived: false
+          buildingIds: $building_id
+          customFieldFilter: '[]'
+        method: GET
+        url: ${ENV(api_url)}/v2/contracts
+    validate:
+    -   eq:
+        - status_code
+        - 200

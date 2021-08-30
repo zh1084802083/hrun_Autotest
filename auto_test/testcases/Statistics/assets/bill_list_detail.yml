@@ -1,0 +1,70 @@
+config:
+    name: 数据舱--收缴率/分摊收缴率详情
+    variables:
+        access_token: ${get_token()}
+        month_payDateFrom: '2021-08-01'
+        month_payDateTo: '2021-08-31'
+        quarter_payDateFrom: '2021-07-01'
+        quarter_payDateTo: '2021-09-30'
+        year_payDateFrom: '2021-01-01'
+        year_payDateTo: '2021-12-31'
+    verify: false
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 收缴率/分摊收缴率详情--按月查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            page: '0'
+            payDateFrom: $month_payDateFrom
+            payDateTo: $month_payDateTo
+            size: '100'
+            type: '租金,物业费'
+        url: ${ENV(api_url)}/api/web/v2/bills/list
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 收缴率/分摊收缴率详情--按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            page: '0'
+            payDateFrom: $quarter_payDateFrom
+            payDateTo: $quarter_payDateTo
+            size: '100'
+            type: '租金,物业费'
+        url: ${ENV(api_url)}/api/web/v2/bills/list
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 收缴率/分摊收缴率详情--按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            page: '0'
+            payDateFrom: $year_payDateFrom
+            payDateTo: $year_payDateTo
+            size: '100'
+            type: '租金,物业费'
+        url: ${ENV(api_url)}/api/web/v2/bills/list
+    validate:
+    -   eq:
+        - status_code
+        - 200

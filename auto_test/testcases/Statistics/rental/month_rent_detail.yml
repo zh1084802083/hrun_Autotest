@@ -1,0 +1,47 @@
+config:
+    name: 数据舱--月出租率走势详情
+    variables:
+        year: '2021'
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 月出租率走势详情--房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            month: '7'
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            year: $year
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/month-rent/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+
+-   name: 月出租率走势详情--工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            month: '7'
+            page: '0'
+            size: '100'
+            statisticSpaceType: CUBICLE
+            year: $year
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/month-rent/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200

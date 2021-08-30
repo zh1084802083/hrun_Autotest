@@ -1,0 +1,124 @@
+config:
+    name: 数据舱--成交走势详情
+    variables:
+        year: '2021'
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 成交走势详情--房源面积--房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            month: '7'
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            statisticsType: AREA_SIZE
+            year: $year
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/deal-trend/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 成交走势详情--合同数--房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            month: '7'
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            statisticsType: CONTRACT_COUNT
+            year: $year
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/deal-trend/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 成交走势详情--房源工位--工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            month: '7'
+            page: '0'
+            size: '100'
+            statisticSpaceType: CUBICLE
+            statisticsType: AREA_SIZE
+            year: $year
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/deal-trend/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 成交走势详情--合同数--工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            month: '7'
+            page: '0'
+            size: '100'
+            statisticSpaceType: CUBICLE
+            statisticsType: CONTRACT_COUNT
+            year: $year
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/deal-trend/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 成交走势详情--房源面积--房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            month: '7'
+            page: '0'
+            size: '100'
+            statisticSpaceType: ALL
+            statisticsType: AREA_SIZE
+            year: $year
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/deal-trend/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 成交走势详情--合同数--房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            month: '7'
+            page: '0'
+            size: '100'
+            statisticSpaceType: ALL
+            statisticsType: CONTRACT_COUNT
+            year: $year
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/deal-trend/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200

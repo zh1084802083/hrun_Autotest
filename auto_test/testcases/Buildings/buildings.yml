@@ -1,0 +1,19 @@
+config:
+    name: 楼宇列表
+    variables:
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 楼宇列表信息
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings
+    extract:
+        building_id: content.items[0].id
+    validate:
+    -   eq:
+        - status_code
+        - 200

@@ -1,0 +1,54 @@
+config:
+    name: 楼宇统计
+    variables:
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 楼宇统计---房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            ids: $building_id
+            portfolioType: BUILDING
+            statisticSpaceType: ROOM
+        url: ${ENV(api_url)}/data-statistics/building/summary
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 楼宇统计---工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            ids: $building_id
+            portfolioType: BUILDING
+            statisticSpaceType: CUBICLE
+        url: ${ENV(api_url)}/data-statistics/building/summary
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 楼宇统计---房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            ids: $building_id
+            portfolioType: BUILDING
+            statisticSpaceType: ALL
+        url: ${ENV(api_url)}/data-statistics/building/summary
+    validate:
+    -   eq:
+        - status_code
+        - 200

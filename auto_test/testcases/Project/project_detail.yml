@@ -1,0 +1,118 @@
+config:
+    name: 获取项目详情
+    variables:
+        access_token: ${get_token()}
+teststeps:
+-   name: 项目列表详情---房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: '0'
+            portfolioType: PROJECT
+            size: '1000'
+            statisticSpaceType: ROOM
+        url: ${ENV(api_url)}/buildings/portfolios
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.id
+        - 9405
+    -   eq:
+        - content.name
+        - 龙湖冠寓
+    -   eq:
+        - content.type
+        - COMPANY
+    -   eq:
+        - content.numberOfManagement
+        - 1360.0
+    -   eq:
+        - content.portfolioSummaryModels[0].type
+        - PROJECT
+    -   eq:
+        - content.totalRoomCount
+        - 7
+    -   eq:
+        - content.numberOfAvailable
+        - 200.0
+    -   eq:
+        - content.totalAvailableRoomCount
+        - 2
+
+-   name: 项目列表详情---工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: '0'
+            portfolioType: PROJECT
+            size: '1000'
+            statisticSpaceType: CUBICLE
+        url: ${ENV(api_url)}/buildings/portfolios
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.id
+        - 9405
+    -   eq:
+        - content.name
+        - 龙湖冠寓
+    -   eq:
+        - content.type
+        - COMPANY
+    -   eq:
+        - content.numberOfManagement
+        - 80
+    -   eq:
+        - content.totalRoomCount
+        - 7
+    -   eq:
+        - content.numberOfAvailable
+        - 5
+    -   eq:
+        - content.totalAvailableRoomCount
+        - 1
+
+-   name: 项目列表详情---房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: '0'
+            portfolioType: PROJECT
+            size: '1000'
+            statisticSpaceType: ALL
+        url: ${ENV(api_url)}/buildings/portfolios
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.id
+        - 9405
+    -   eq:
+        - content.name
+        - 龙湖冠寓
+    -   eq:
+        - content.type
+        - COMPANY
+    -   eq:
+        - content.numberOfManagement
+        - 3370
+    -   eq:
+        - content.totalRoomCount
+        - 14
+    -   eq:
+        - content.numberOfAvailable
+        - 250
+    -   eq:
+        - content.totalAvailableRoomCount
+        - 3

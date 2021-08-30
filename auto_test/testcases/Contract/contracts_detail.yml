@@ -1,0 +1,72 @@
+config:
+    name: 合同详情
+    variables:
+        access_token: ${get_token()}
+    verify: false
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 获取合同列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        params:
+          page: 0
+          size: 10
+          archived: false
+          buildingIds: $building_id
+          customFieldFilter: []
+        method: GET
+        url: ${ENV(api_url)}/v2/contracts
+    extract:
+      - firstRentDeposit: content.content.0.firstRentDeposit
+      - firstRentTermPrice: content.content.0.firstRentTermPrice
+      - areaSize: content.content.0.areaSize
+      - resourceId: content.content.0.resources.0.resourceId
+      - jointNumber: content.content.0.resources.0.jointNumber
+      - contract_id: content.content.0.id
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 查看合同详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/v2/contracts/$contract_id
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.buildingName
+        - "测试楼宇"
+    -   eq:
+        - content.id
+        - $contract_id
+    -   eq:
+        - content.baseTerm.areaSize
+        - $areaSize
+    -   eq:
+        - content.expenseTerms.0.contractPays.12.finalPrice
+        - $firstRentTermPrice
+    -   eq:
+        - content.expenseTerms.0.contractPays.12.payMoney
+        - $firstRentDeposit
+    -   eq:
+        - content.expenseTerms.0.contractPays.12.theoryPayMoney
+        - $firstRentDeposit
+    -   eq:
+        - content.resources.0.areaSize
+        - $areaSize
+    -   eq:
+        - content.resources.0.resourceId
+        - $resourceId
+    -   eq:
+        - content.resources.0.jointNumber
+        - $jointNumber

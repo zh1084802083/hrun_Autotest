@@ -1,0 +1,51 @@
+config:
+    name: 数据舱--到期提醒合同份数/面积/工位数
+    variables:
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 到期提醒合同份数，面积--房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticsSpaceType: ROOM
+        url: ${ENV(api_url)}/v3/contracts/notice/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 到期提醒合同份数，工位数--工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticsSpaceType: CUBICLE
+        url: ${ENV(api_url)}/v3/contracts/notice/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 到期提醒合同份数，面积--房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticsSpaceType: ALL
+        url: ${ENV(api_url)}/v3/contracts/notice/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200

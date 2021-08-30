@@ -1,0 +1,49 @@
+config:
+    name: 删除房源
+    variables:
+        access_token: ${get_token()}
+        room_number: ${random_int(101,199)}
+        areaSize: ${str_to_int(10)}
+    verify: false
+    export:
+        - room_id
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 新增可招商房源
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        json:
+            areaSize: $areaSize
+            buildingId: $building_id
+            cubicleUpdateRequests: []
+            floorName: '1'
+            jsonData: '[{"required":false,"fieldName":"建筑面积","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"装修","fieldType":"SINGLE_SELECT","values":["不限","毛坯","简装","精装"],"systemField":true},{"required":false,"fieldName":"预租单价","fieldType":"NUMBER","systemField":true}]'
+            marketingAvailable: 'true'
+            realAreaSize: $areaSize
+            roomNumber: $room_number
+            spaceType: ROOM
+        method: POST
+        url: ${ENV(api_url)}/buildings/$building_id/rooms
+    extract:
+        - room_id: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 删除房源
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        method: DELETE
+        url: ${ENV(api_url)}/buildings/$building_id/rooms/$room_id
+    validate:
+    -   eq:
+        - status_code
+        - 204

@@ -1,0 +1,105 @@
+config:
+    name: 数据舱--租金实时单价分布
+    variables:
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 租金实时单价分布--房源--房源面积--元/m²∙天
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            priceUnit: D
+            statisticSpaceType: ROOM
+            statisticsType: AREA_SIZE
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/rent-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 租金实时单价分布--工位--房源工位--元/月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            priceUnit: YM
+            statisticSpaceType: CUBICLE
+            statisticsType: AREA_SIZE
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/rent-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 租金实时单价分布--房源+工位--房源面积--元/月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            priceUnit: YM
+            statisticSpaceType: ALL
+            statisticsType: AREA_SIZE
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/rent-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 租金实时单价分布--房源--合同数--元/m²∙天
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            priceUnit: D
+            statisticSpaceType: ROOM
+            statisticsType: CONTRACT_COUNT
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/rent-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 租金实时单价分布--工位--合同数--元/月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            priceUnit: YM
+            statisticSpaceType: CUBICLE
+            statisticsType: CONTRACT_COUNT
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/rent-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 租金实时单价分布--房源+工位--合同数--元/月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            priceUnit: YM
+            statisticSpaceType: ALL
+            statisticsType: CONTRACT_COUNT
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/rent-price
+    validate:
+    -   eq:
+        - status_code
+        - 200

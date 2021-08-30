@@ -1,0 +1,173 @@
+config:
+    name: 数据舱-平效统计
+    variables:
+        beginDate: '2021-01-01'
+        endDate: '2021-12-31'
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 数据舱-平效-房源-按月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-平效-工位-按月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-平效-房源+工位-按月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-平效-房源-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-平效-工位-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-平效-房源+工位-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 平效-房源(楼层)-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 平效-工位-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 平效-房源+工位-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200

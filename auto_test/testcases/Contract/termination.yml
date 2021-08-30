@@ -1,0 +1,824 @@
+config:
+    name: 退租房源合同
+    variables:
+        access_token: ${get_token()}
+        areaSize: ${str_to_int(10)}
+        room_number: ${random_int(101,199)}
+    verify: false
+    export:
+        - room_id
+        - building_id
+        - contract_id
+        - customerId
+teststeps:
+-   name: 获取用户id
+    testcase: testcases/Auth/user_info.yml
+
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 新增可招商房源
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        json:
+            areaSize: $areaSize
+            buildingId: $building_id
+            cubicleUpdateRequests: []
+            floorName: '1'
+            jsonData: '[{"required":false,"fieldName":"建筑面积","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"装修","fieldType":"SINGLE_SELECT","values":["不限","毛坯","简装","精装"],"systemField":true},{"required":false,"fieldName":"预租单价","fieldType":"NUMBER","systemField":true}]'
+            marketingAvailable: 'true'
+            realAreaSize: $areaSize
+            roomNumber: $room_number
+            spaceType: ROOM
+        method: POST
+        url: ${ENV(api_url)}/buildings/$building_id/rooms
+    extract:
+        - room_id: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 生成房源合同租金明细
+    request:
+        headers:
+            authorization: Bearer $access_token
+        json:
+            baseTerm:
+                areaSize: $areaSize
+                calculateOrder: AREA_FIRST
+                deposit: 1
+                depositPayEnumDesc: 租金保证金
+                depositUnitEnum: MONTH
+                leaseBeginDate: ${begin_date()}
+                leaseEndDate: ${end_180()}
+                monetaryUnit: 人民币CNY
+                precisionEnum: RESULT
+                signDate: ${begin_date()}
+                spaceUnit: P
+                theoryRounded: false
+                unitPricePrecision: 2
+            depositIncreasingRates: []
+            discounts: []
+            increasingRates: []
+            leaseTerms:
+            -   calculateEnum: MONTH
+                dayNumberForYear: 365
+                deposit: false
+                intervalMonth: 1
+                leaseComputeWay: FIXED_MONEY
+                leaseDivideRoleEnum: NORMAL
+                leaseTermType: RENT
+                leaseTermTypeDesc: 租金
+                monetaryUnit: 人民币CNY
+                payInAdvanceDay: 1
+                paymentDateEnum: WORKDAY
+                price: 10
+                priceUnitEnum: D
+                termBeginDate: ${begin_date()}
+                termEndDate: ${end_180()}
+        method: POST
+        url: ${ENV(api_url)}/v2/contracts/pays
+    extract:
+        - theoryPayDate_0: content.0.theoryPayDate
+        - theoryPayDate_1: content.1.theoryPayDate
+        - theoryPayDate_2: content.2.theoryPayDate
+        - theoryPayDate_3: content.3.theoryPayDate
+        - theoryPayDate_4: content.4.theoryPayDate
+        - theoryPayDate_5: content.5.theoryPayDate
+        - theoryPayDate_6: content.6.theoryPayDate
+        - startDate_0: content.0.startDate
+        - startDate_1: content.1.startDate
+        - startDate_2: content.2.startDate
+        - startDate_3: content.3.startDate
+        - startDate_4: content.4.startDate
+        - startDate_5: content.5.startDate
+        - startDate_6: content.6.startDate
+        - endDate_0: content.0.endDate
+        - endDate_1: content.1.endDate
+        - endDate_2: content.2.endDate
+        - endDate_3: content.3.endDate
+        - endDate_4: content.4.endDate
+        - endDate_5: content.5.endDate
+        - endDate_6: content.6.endDate
+        - finalPrice_0: content.0.finalPrice
+        - finalPrice_1: content.1.finalPrice
+        - finalPrice_2: content.2.finalPrice
+        - finalPrice_3: content.3.finalPrice
+        - finalPrice_4: content.4.finalPrice
+        - finalPrice_5: content.5.finalPrice
+        - finalPrice_6: content.6.finalPrice
+        - theoryPayMoney_0: content.0.theoryPayMoney
+        - theoryPayMoney_1: content.1.theoryPayMoney
+        - theoryPayMoney_2: content.2.theoryPayMoney
+        - theoryPayMoney_3: content.3.theoryPayMoney
+        - theoryPayMoney_4: content.4.theoryPayMoney
+        - theoryPayMoney_5: content.5.theoryPayMoney
+        - theoryPayMoney_6: content.6.theoryPayMoney
+        - payMoney_0: content.0.payMoney
+        - payMoney_1: content.1.payMoney
+        - payMoney_2: content.2.payMoney
+        - payMoney_3: content.3.payMoney
+        - payMoney_4: content.4.payMoney
+        - payMoney_5: content.5.payMoney
+        - payMoney_6: content.6.payMoney
+        - commissionStandard_0: content.0.commissionStandard
+        - commissionStandard_1: content.1.commissionStandard
+        - commissionStandard_2: content.2.commissionStandard
+        - commissionStandard_3: content.3.commissionStandard
+        - commissionStandard_4: content.4.commissionStandard
+        - commissionStandard_5: content.5.commissionStandard
+        - commissionStandard_6: content.6.commissionStandard
+        - planRentAmount_0: content.0.planRentAmount
+        - planRentAmount_1: content.1.planRentAmount
+        - planRentAmount_2: content.2.planRentAmount
+        - planRentAmount_3: content.3.planRentAmount
+        - planRentAmount_4: content.4.planRentAmount
+        - planRentAmount_5: content.5.planRentAmount
+        - planRentAmount_6: content.6.planRentAmount
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 新建房源合同--按面积计算租金
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        json:
+            baseTerm:
+                areaSize: $areaSize
+                calculateOrder: AREA_FIRST
+                contractNo: '001'
+                leaseBeginDate: ${begin_date()}
+                leaseEndDate: ${end_180()}
+                precisionEnum: RESULT
+                signDate: ${begin_date()}
+                spaceUnit: P
+                theoryRounded: false
+                unitPricePrecision: 2
+            contractNo: '001'
+            customKeywords: []
+            expenseTerms:
+            -   areaSize: $areaSize
+                buildingType: OFFICE
+                contractExpenseTermName: 租赁条款
+                contractPays:
+                -   applyDate: null
+                    carryAmount: 0
+                    carryForwards: []
+                    commissionMoney: 0
+                    commissionRateModels: null
+                    commissionStandard: $commissionStandard_0
+                    payMoney: $payMoney_0
+                    planRentAmount: $planRentAmount_0
+                    startDate: $startDate_0
+                    endDate: $endDate_0
+                    theoryPayDate: $theoryPayDate_0
+                    theoryPayMoney: $theoryPayMoney_0
+                    finalPrice: $finalPrice_0
+                    commissionStatus: NONE
+                    contractId: null
+                    contractPayRentCommission: NORMAL
+                    deposit: false
+                    generateBills: false
+                    id: null
+                    increaseNumber: null
+                    increaseRateEnum: null
+                    key: I2N6jRVli
+                    monetaryUnit: 人民币CNY
+                    moneyDiscount: true
+                    normalIndex: 1-1
+                    payEnum: RENT
+                    payEnumDesc: 租金
+                    priceUnitEnum: D
+                    primaryTermIndex: 1
+                    tempPayMoney: null
+                    termIndex: 1
+                -   applyDate: null
+                    carryAmount: 0
+                    carryForwards: []
+                    commissionMoney: 0
+                    commissionRateModels: null
+                    commissionStandard: $commissionStandard_1
+                    payMoney: $payMoney_1
+                    planRentAmount: $planRentAmount_1
+                    startDate: $startDate_1
+                    endDate: $endDate_1
+                    theoryPayDate: $theoryPayDate_1
+                    theoryPayMoney: $theoryPayMoney_1
+                    finalPrice: $finalPrice_1
+                    commissionStatus: NONE
+                    contractId: null
+                    contractPayRentCommission: NORMAL
+                    deposit: false
+                    generateBills: false
+                    id: null
+                    increaseNumber: null
+                    increaseRateEnum: null
+                    key: gH1LTxtjGs
+                    monetaryUnit: 人民币CNY
+                    moneyDiscount: true
+                    normalIndex: 1-2
+                    payEnum: RENT
+                    payEnumDesc: 租金
+                    priceUnitEnum: D
+                    primaryTermIndex: 2
+                    tempPayMoney: null
+                    termIndex: 2
+                -   applyDate: null
+                    carryAmount: 0
+                    carryForwards: []
+                    commissionMoney: 0
+                    commissionRateModels: null
+                    commissionStandard: $commissionStandard_2
+                    payMoney: $payMoney_2
+                    planRentAmount: $planRentAmount_2
+                    startDate: $startDate_2
+                    endDate: $endDate_2
+                    theoryPayDate: $theoryPayDate_2
+                    theoryPayMoney: $theoryPayMoney_2
+                    finalPrice: $finalPrice_2
+                    commissionStatus: NONE
+                    contractId: null
+                    contractPayRentCommission: NORMAL
+                    deposit: false
+                    generateBills: false
+                    id: null
+                    increaseNumber: null
+                    increaseRateEnum: null
+                    key: jwYXJiL2V6
+                    monetaryUnit: 人民币CNY
+                    moneyDiscount: true
+                    normalIndex: 1-3
+                    payEnum: RENT
+                    payEnumDesc: 租金
+                    priceUnitEnum: D
+                    primaryTermIndex: 3
+                    tempPayMoney: null
+                    termIndex: 3
+                -   applyDate: null
+                    carryAmount: 0
+                    carryForwards: []
+                    commissionMoney: 0
+                    commissionRateModels: null
+                    commissionStandard: $commissionStandard_3
+                    payMoney: $payMoney_3
+                    planRentAmount: $planRentAmount_3
+                    startDate: $startDate_3
+                    endDate: $endDate_3
+                    theoryPayDate: $theoryPayDate_3
+                    theoryPayMoney: $theoryPayMoney_3
+                    finalPrice: $finalPrice_3
+                    commissionStatus: NONE
+                    contractId: null
+                    contractPayRentCommission: NORMAL
+                    deposit: false
+                    generateBills: false
+                    id: null
+                    increaseNumber: null
+                    increaseRateEnum: null
+                    key: drF-WA9m8J
+                    monetaryUnit: 人民币CNY
+                    moneyDiscount: true
+                    normalIndex: 1-4
+                    payEnum: RENT
+                    payEnumDesc: 租金
+                    priceUnitEnum: D
+                    primaryTermIndex: 4
+                    tempPayMoney: null
+                    termIndex: 4
+                -   applyDate: null
+                    carryAmount: 0
+                    carryForwards: []
+                    commissionMoney: 0
+                    commissionRateModels: null
+                    commissionStandard: $commissionStandard_4
+                    payMoney: $payMoney_4
+                    planRentAmount: $planRentAmount_4
+                    startDate: $startDate_4
+                    endDate: $endDate_4
+                    theoryPayDate: $theoryPayDate_4
+                    theoryPayMoney: $theoryPayMoney_4
+                    finalPrice: $finalPrice_4
+                    commissionStatus: NONE
+                    contractId: null
+                    contractPayRentCommission: NORMAL
+                    deposit: false
+                    generateBills: false
+                    id: null
+                    increaseNumber: null
+                    increaseRateEnum: null
+                    key: V6sxwlOyIX
+                    monetaryUnit: 人民币CNY
+                    moneyDiscount: true
+                    normalIndex: 1-5
+                    payEnum: RENT
+                    payEnumDesc: 租金
+                    priceUnitEnum: D
+                    primaryTermIndex: 5
+                    tempPayMoney: null
+                    termIndex: 5
+                -   applyDate: null
+                    carryAmount: 0
+                    carryForwards: []
+                    commissionMoney: 0
+                    commissionRateModels: null
+                    commissionStandard: $commissionStandard_5
+                    payMoney: $payMoney_5
+                    planRentAmount: $planRentAmount_5
+                    startDate: $startDate_5
+                    endDate: $endDate_5
+                    theoryPayDate: $theoryPayDate_5
+                    theoryPayMoney: $theoryPayMoney_5
+                    finalPrice: $finalPrice_5
+                    commissionStatus: NONE
+                    contractId: null
+                    contractPayRentCommission: NORMAL
+                    deposit: false
+                    generateBills: false
+                    id: null
+                    increaseNumber: null
+                    increaseRateEnum: null
+                    key: kumgYdAaeu
+                    monetaryUnit: 人民币CNY
+                    moneyDiscount: true
+                    normalIndex: 1-6
+                    payEnum: RENT
+                    payEnumDesc: 租金
+                    priceUnitEnum: D
+                    primaryTermIndex: 6
+                    tempPayMoney: null
+                    termIndex: 6
+                -   applyDate: null
+                    carryAmount: 0
+                    carryForwards: []
+                    commissionMoney: 0
+                    commissionRateModels: null
+                    commissionStandard: $commissionStandard_6
+                    payMoney: $payMoney_6
+                    planRentAmount: $planRentAmount_6
+                    startDate: $startDate_6
+                    endDate: $endDate_6
+                    theoryPayDate: $theoryPayDate_6
+                    theoryPayMoney: $theoryPayMoney_6
+                    finalPrice: $finalPrice_6
+                    commissionStatus: NONE
+                    contractId: null
+                    contractPayRentCommission: NORMAL
+                    deposit: true
+                    generateBills: false
+                    id: null
+                    increaseNumber: null
+                    increaseRateEnum: null
+                    key: JS_YnDm8sA
+                    monetaryUnit: 人民币CNY
+                    moneyDiscount: false
+                    normalIndex: null
+                    payEnum: RENT_DEPOSIT
+                    payEnumDesc: 租金保证金
+                    priceUnitEnum: null
+                    primaryTermIndex: null
+                    tempPayMoney: null
+                    termIndex: 7
+                deposit: 1
+                depositIncreasingRates: []
+                depositUnitEnum: MONTH
+                discounts: []
+                expenseTermType: RENT_TERM
+                increasingRates: []
+                itemPermission: RENT_PERMISSION
+                leaseTerms:
+                -   calculateEnum: MONTH
+                    dayNumberForYear: 365
+                    deposit: false
+                    intervalMonth: 1
+                    leaseComputeWay: FIXED_MONEY
+                    leaseDivideRoleEnum: NORMAL
+                    leaseTermType: RENT
+                    leaseTermTypeDesc: 租金
+                    monetaryUnit: 人民币CNY
+                    payInAdvanceDay: 1
+                    paymentDateEnum: WORKDAY
+                    price: 10
+                    priceUnitEnum: D
+                    termBeginDate: ${begin_date()}
+                    termEndDate: ${end_180()}
+                monetaryUnit: 人民币CNY
+                resourceIds:
+                - $room_id
+                resourceType: ROOM
+                spaceUnit: P
+                termIndex: 1
+            followId: 4990
+            followName: '13787340624'
+            jsonData: '[]'
+            legalPerson:
+                name: 李传根
+            remarkTerms: []
+            resourceIds:
+            - $room_id
+            resourceType: ROOM
+            tags: []
+            tenantId: 78327
+            tenantName: 湖南神雀网络科技有限公司
+            tenantNo: null
+        method: POST
+        url: ${ENV(api_url)}/v3/contracts?
+    extract:
+        - contract_id: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 提交生效合同
+    request:
+        headers:
+            content-type: application/json
+            authorization: Bearer $access_token
+        json:
+            buildingIds: [$building_id]
+            subDomainType: "NEW_APPROVAL"
+            domainType: "CONTRACT"
+            customerId: $customerId
+            description: "湖南神雀网络科技有限公司/测试楼宇/$room_number"
+            objectId: $contract_id
+        method: POST
+        url: ${ENV(api_url)}/oa/start
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    teardown_hooks:
+        - ${wait($response,1)}
+
+-   name: 计算退租协议所需金额
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            terminationDate: ${begin_date()}
+        url: ${ENV(api_url)}/v3/contracts/$contract_id/termination/finance/term
+    extract:
+        - billId_0: content.rentals.0.billId
+        - billId_1: content.rentals.1.billId
+        - billId_2: content.rentals.2.billId
+        - billId_3: content.rentals.3.billId
+        - billId_4: content.rentals.4.billId
+        - billId_5: content.rentals.5.billId
+        - billId_6: content.deposits.0.billId
+        - curRemainingAmount_0: content.rentals.0.curRemainingAmount
+        - curRemainingAmount_1: content.rentals.1.curRemainingAmount
+        - curRemainingAmount_2: content.rentals.2.curRemainingAmount
+        - curRemainingAmount_3: content.rentals.3.curRemainingAmount
+        - curRemainingAmount_4: content.rentals.4.curRemainingAmount
+        - curRemainingAmount_5: content.rentals.5.curRemainingAmount
+        - curRemainingAmount_6: content.deposits.0.curRemainingAmount
+        - expenseTermId_0: content.rentals.0.expenseTermId
+        - expenseTermId_1: content.rentals.1.expenseTermId
+        - expenseTermId_2: content.rentals.2.expenseTermId
+        - expenseTermId_3: content.rentals.3.expenseTermId
+        - expenseTermId_4: content.rentals.4.expenseTermId
+        - expenseTermId_5: content.rentals.5.expenseTermId
+        - expenseTermId_6: content.deposits.0.expenseTermId
+        - t_endDate_0: content.rentals.0.endDate
+        - t_endDate_1: content.rentals.1.endDate
+        - t_endDate_2: content.rentals.2.endDate
+        - t_endDate_3: content.rentals.3.endDate
+        - t_endDate_4: content.rentals.4.endDate
+        - t_endDate_5: content.rentals.5.endDate
+        - t_endDate_6: content.deposits.0.endDate
+        - t_startDate_0: content.rentals.0.endDate
+        - t_startDate_1: content.rentals.1.endDate
+        - t_startDate_2: content.rentals.2.endDate
+        - t_startDate_3: content.rentals.3.endDate
+        - t_startDate_4: content.rentals.4.endDate
+        - t_startDate_5: content.rentals.5.endDate
+        - t_startDate_6: content.deposits.0.endDate
+        - t_payDate_0: content.rentals.0.payDate
+        - t_payDate_1: content.rentals.1.payDate
+        - t_payDate_2: content.rentals.2.payDate
+        - t_payDate_3: content.rentals.3.payDate
+        - t_payDate_4: content.rentals.4.payDate
+        - t_payDate_5: content.rentals.5.payDate
+        - t_payDate_6: content.deposits.0.payDate
+        - primeAmount_0: content.rentals.0.primeAmount
+        - primeAmount_1: content.rentals.1.primeAmount
+        - primeAmount_2: content.rentals.2.primeAmount
+        - primeAmount_3: content.rentals.3.primeAmount
+        - primeAmount_4: content.rentals.4.primeAmount
+        - primeAmount_5: content.rentals.5.primeAmount
+        - primeAmount_6: content.deposits.0.primeAmount
+        - remainingAmount_0: content.rentals.0.remainingAmount
+        - remainingAmount_1: content.rentals.1.remainingAmount
+        - remainingAmount_2: content.rentals.2.remainingAmount
+        - remainingAmount_3: content.rentals.3.remainingAmount
+        - remainingAmount_4: content.rentals.4.remainingAmount
+        - remainingAmount_5: content.rentals.5.remainingAmount
+        - remainingAmount_6: content.deposits.0.remainingAmount
+        - settledStatus_0: content.rentals.0.settledStatus
+        - settledStatus_1: content.rentals.1.settledStatus
+        - settledStatus_2: content.rentals.2.settledStatus
+        - settledStatus_3: content.rentals.3.settledStatus
+        - settledStatus_4: content.rentals.4.settledStatus
+        - settledStatus_5: content.rentals.5.settledStatus
+        - settledStatus_6: content.deposits.0.settledStatus
+        - tempCurRemainingAmount_0: content.rentals.0.tempCurRemainingAmount
+        - tempCurRemainingAmount_1: content.rentals.1.tempCurRemainingAmount
+        - tempCurRemainingAmount_2: content.rentals.2.tempCurRemainingAmount
+        - tempCurRemainingAmount_3: content.rentals.3.tempCurRemainingAmount
+        - tempCurRemainingAmount_4: content.rentals.4.tempCurRemainingAmount
+        - tempCurRemainingAmount_5: content.rentals.5.tempCurRemainingAmount
+        - tempCurRemainingAmount_6: content.deposits.0.tempCurRemainingAmount
+        - theoryAmount_0: content.rentals.0.theoryAmount
+        - theoryAmount_1: content.rentals.1.theoryAmount
+        - theoryAmount_2: content.rentals.2.theoryAmount
+        - theoryAmount_3: content.rentals.3.theoryAmount
+        - theoryAmount_4: content.rentals.4.theoryAmount
+        - theoryAmount_5: content.rentals.5.theoryAmount
+        - theoryAmount_6: content.deposits.0.theoryAmount
+        - diffAmount_0: content.rentals.0.diffAmount
+        - diffAmount_1: content.rentals.1.diffAmount
+        - diffAmount_2: content.rentals.2.diffAmount
+        - diffAmount_3: content.rentals.3.diffAmount
+        - diffAmount_4: content.rentals.4.diffAmount
+        - diffAmount_5: content.rentals.5.diffAmount
+        - diffAmount_6: content.deposits.0.diffAmount
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 退租房源合同
+    request:
+        headers:
+            content-type: application/json; charset=utf-8
+            authorization: Bearer $access_token
+        json:
+            billList:
+            -   action: IN
+                adjustAmount: 0
+                billId: $billId_0
+                curRemainingAmount: $curRemainingAmount_0
+                endDate: $t_endDate_0
+                expenseTermId: $expenseTermId_0
+                startDate: $t_startDate_0
+                tempCurRemainingAmount: $tempCurRemainingAmount_0
+                theoryAmount: $theoryAmount_0
+                primeAmount: $primeAmount_0
+                remainingAmount: $remainingAmount_0
+                payDate: $t_payDate_0
+                settledStatus: $settledStatus_0
+                billType: 租金
+                carryAmount: null
+                carryBills: []
+                carryDirectionEnum: null
+                deposit: false
+                diffAmount: $diffAmount_0
+                historyCarryAmount: 0
+                historyCarryBills: []
+                historyCarryInAmount: 0
+                historyCarryOutAmount: 0
+                id: null
+                memo: 第1期应收账单
+                monetaryUnit: 人民币CNY
+                overDueFineAmount: null
+                payedAmount: 0
+            -   action: IN
+                adjustAmount: 0
+                billId: $billId_1
+                curRemainingAmount: $curRemainingAmount_1
+                endDate: $t_endDate_1
+                expenseTermId: $expenseTermId_1
+                startDate: $t_startDate_1
+                tempCurRemainingAmount: $tempCurRemainingAmount_1
+                theoryAmount: $theoryAmount_1
+                primeAmount: $primeAmount_1
+                remainingAmount: $remainingAmount_1
+                payDate: $t_payDate_1
+                settledStatus: $settledStatus_1
+                billType: 租金
+                carryAmount: null
+                carryBills: []
+                carryDirectionEnum: null
+                deposit: false
+                diffAmount: $diffAmount_1
+                historyCarryAmount: 0
+                historyCarryBills: []
+                historyCarryInAmount: 0
+                historyCarryOutAmount: 0
+                id: null
+                memo: 第2期应收账单
+                monetaryUnit: 人民币CNY
+                overDueFineAmount: null
+                payedAmount: 0
+            -   action: IN
+                adjustAmount: 0
+                billId: $billId_2
+                curRemainingAmount: $curRemainingAmount_2
+                endDate: $t_endDate_2
+                expenseTermId: $expenseTermId_2
+                startDate: $t_startDate_2
+                tempCurRemainingAmount: $tempCurRemainingAmount_2
+                theoryAmount: $theoryAmount_2
+                primeAmount: $primeAmount_2
+                remainingAmount: $remainingAmount_2
+                payDate: $t_payDate_2
+                settledStatus: $settledStatus_2
+                billType: 租金
+                carryAmount: null
+                carryBills: []
+                carryDirectionEnum: null
+                deposit: false
+                diffAmount: $diffAmount_2
+                historyCarryAmount: 0
+                historyCarryBills: []
+                historyCarryInAmount: 0
+                historyCarryOutAmount: 0
+                id: null
+                memo: 第3期应收账单
+                monetaryUnit: 人民币CNY
+                overDueFineAmount: null
+                payedAmount: 0
+            -   action: IN
+                adjustAmount: 0
+                billId: $billId_3
+                curRemainingAmount: $curRemainingAmount_3
+                endDate: $t_endDate_3
+                expenseTermId: $expenseTermId_3
+                startDate: $t_startDate_3
+                tempCurRemainingAmount: $tempCurRemainingAmount_3
+                theoryAmount: $theoryAmount_3
+                primeAmount: $primeAmount_3
+                remainingAmount: $remainingAmount_3
+                payDate: $t_payDate_3
+                settledStatus: $settledStatus_3
+                billType: 租金
+                carryAmount: null
+                carryBills: []
+                carryDirectionEnum: null
+                deposit: false
+                diffAmount: $diffAmount_3
+                historyCarryAmount: 0
+                historyCarryBills: []
+                historyCarryInAmount: 0
+                historyCarryOutAmount: 0
+                id: null
+                memo: 第4期应收账单
+                monetaryUnit: 人民币CNY
+                overDueFineAmount: null
+                payedAmount: 0
+            -   action: IN
+                adjustAmount: 0
+                billId: $billId_4
+                curRemainingAmount: $curRemainingAmount_4
+                endDate: $t_endDate_4
+                expenseTermId: $expenseTermId_4
+                startDate: $t_startDate_4
+                tempCurRemainingAmount: $tempCurRemainingAmount_4
+                theoryAmount: $theoryAmount_4
+                primeAmount: $primeAmount_4
+                remainingAmount: $remainingAmount_4
+                payDate: $t_payDate_4
+                settledStatus: $settledStatus_4
+                billType: 租金
+                carryAmount: null
+                carryBills: []
+                carryDirectionEnum: null
+                deposit: false
+                diffAmount: $diffAmount_4
+                historyCarryAmount: 0
+                historyCarryBills: []
+                historyCarryInAmount: 0
+                historyCarryOutAmount: 0
+                id: null
+                memo: 第5期应收账单
+                monetaryUnit: 人民币CNY
+                overDueFineAmount: null
+                payedAmount: 0
+            -   action: IN
+                adjustAmount: 0
+                billId: $billId_5
+                curRemainingAmount: $curRemainingAmount_5
+                endDate: $t_endDate_5
+                expenseTermId: $expenseTermId_5
+                startDate: $t_startDate_5
+                tempCurRemainingAmount: $tempCurRemainingAmount_5
+                theoryAmount: $theoryAmount_5
+                primeAmount: $primeAmount_5
+                remainingAmount: $remainingAmount_5
+                payDate: $t_payDate_5
+                settledStatus: $settledStatus_5
+                billType: 租金
+                carryAmount: null
+                carryBills: []
+                carryDirectionEnum: null
+                deposit: false
+                diffAmount: $diffAmount_5
+                historyCarryAmount: 0
+                historyCarryBills: []
+                historyCarryInAmount: 0
+                historyCarryOutAmount: 0
+                id: null
+                memo: 第6期应收账单
+                monetaryUnit: 人民币CNY
+                overDueFineAmount: null
+                payedAmount: 0
+            -   action: IN
+                adjustAmount: 0
+                billId: $billId_6
+                curRemainingAmount: $curRemainingAmount_6
+                endDate: $t_endDate_6
+                expenseTermId: $expenseTermId_6
+                startDate: $t_startDate_6
+                tempCurRemainingAmount: $tempCurRemainingAmount_6
+                theoryAmount: $theoryAmount_6
+                primeAmount: $primeAmount_6
+                remainingAmount: $remainingAmount_6
+                payDate: $t_payDate_6
+                settledStatus: $settledStatus_6
+                billType: 租金保证金
+                carryAmount: null
+                carryBills: []
+                carryDirectionEnum: null
+                deposit: true
+                diffAmount: $diffAmount_6
+                historyCarryAmount: 0
+                historyCarryBills: []
+                historyCarryInAmount: 0
+                historyCarryOutAmount: 0
+                id: null
+                memo: 租金保证金
+                monetaryUnit: 人民币CNY
+                overDueFineAmount: null
+                payedAmount: 0
+            expenseList:
+            -   costType: 历史账单结算
+                diffAmount: 0
+                monetaryUnit: 人民币CNY
+            -   costType: 其他费用
+                diffAmount: 0
+                monetaryUnit: 人民币CNY
+            -   costType: 保证金
+                diffAmount: 0
+                monetaryUnit: 人民币CNY
+            leaseBeginDate: ${begin_date()}
+            memo: ''
+            reasons:
+            - 价格因素
+            registeredAddressModifyEndDate: ${begin_date()}
+            signDate: ${begin_date()}
+            tenant: 湖南神雀网络科技有限公司
+            terminationDate: ${begin_date()}
+            virtualId: 827907218296
+        method: POST
+        url: ${ENV(api_url)}/v3/contracts/$contract_id/termination
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 提交退租合同
+    request:
+        headers:
+            content-type: application/json
+            authorization: Bearer $access_token
+        json:
+            buildingIds: [$building_id]
+            subDomainType: "TERMINATION_APPROVAL"
+            domainType: "CONTRACT"
+            customerId: $customerId
+            description: "湖南神雀网络科技有限公司/测试楼宇、$room_number"
+            objectId: $contract_id
+        method: POST
+        url: ${ENV(api_url)}/oa/start
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    setup_hooks:
+        - ${set_contract_sh()}
+    teardown_hooks:
+        - ${wait($response,1)}
+
+-   name: 查看合同状态是否为已退租
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/v2/contracts/$contract_id
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.showStatus
+        - "TERMINATED"
+    -   eq:
+        - content.showStatusName
+        - "已退租"

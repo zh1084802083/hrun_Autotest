@@ -1,0 +1,378 @@
+config:
+    name: 空间管理--房源列表
+    variables:
+        access_token: ${get_token()}
+    export:
+        - building_id
+#        - realAreaSize
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 获取房态列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: 0
+            size: 20
+            beginDate: '2021-01-01'
+            endDate: '2021-12-31'
+            loadOccupancyInfo: true
+            loadRentingInfo: false
+            buildingIds: $building_id
+            spaceTypes: ROOM,CUBICLE
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取工位类型房源列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: CUBICLE
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取房源、工位类型房源列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM,CUBICLE
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取可招商房源列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM
+            available: 'true'
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 可招商房源列表-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM
+            available: 'true'
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取可招商工位类型房源列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: CUBICLE
+            available: 'true'
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 可招商工位类型房源列表-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: CUBICLE
+            available: 'true'
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取可招商房源、工位类型房源列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM,CUBICLE
+            available: 'true'
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 可招商房源、工位类型房源列表-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM,CUBICLE
+            available: 'true'
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取已出租房源面积
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM
+            roomStatus: OCCUPIED
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 已出租房源-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM
+            roomStatus: OCCUPIED
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取已出租工位类型房源面积
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: CUBICLE
+            roomStatus: OCCUPIED
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 已出租工位类型房源-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: CUBICLE
+            roomStatus: OCCUPIED
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取已出租房源、工位类型房源面积
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM,CUBICLE
+            roomStatus: OCCUPIED
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 已出租房源、工位类型房源-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM,CUBICLE
+            roomStatus: OCCUPIED
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取空置房源面积
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM
+            roomStatus: VACANCY
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 空置房源面积-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM
+            roomStatus: VACANCY
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取空置工位类型房源面积
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: CUBICLE
+            roomStatus: VACANCY
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 空置工位类型房源-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: CUBICLE
+            roomStatus: VACANCY
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取空置房源、工位类型房源面积
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM,CUBICLE
+            roomStatus: VACANCY
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 空置房源、工位类型房源面积-按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '1000'
+            spaceTypes: ROOM,CUBICLE
+            roomStatus: VACANCY
+            keyword: 101
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 房态列表按房号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: 0
+            size: 20
+            keyword: 101
+            beginDate: '2021-01-01'
+            endDate: '2021-12-31'
+            loadOccupancyInfo: true
+            loadRentingInfo: false
+            buildingIds: $building_id
+            spaceTypes: ROOM,CUBICLE
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200

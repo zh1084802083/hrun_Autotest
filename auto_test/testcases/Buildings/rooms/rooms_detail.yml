@@ -1,0 +1,110 @@
+config:
+    name: 房源列表--新增房源--查看详情
+    variables:
+        access_token: ${get_token()}
+        room_number: ${random_int(101,199)}
+        areaSize: ${str_to_int(10)}
+    verify: false
+    export:
+        - building_id
+        - room_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 新增可招商房源
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        json:
+            areaSize: $areaSize
+            buildingId: $building_id
+            cubicleUpdateRequests: []
+            floorName: '1'
+            jsonData: '[{"required":false,"fieldName":"建筑面积","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"装修","fieldType":"SINGLE_SELECT","values":["不限","毛坯","简装","精装"],"systemField":true},{"required":false,"fieldName":"预租单价","fieldType":"NUMBER","systemField":true}]'
+            marketingAvailable: 'true'
+            realAreaSize: $areaSize
+            roomNumber: $room_number
+            spaceType: ROOM
+        method: POST
+        url: ${ENV(api_url)}/buildings/$building_id/rooms
+    extract:
+        - room_id: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 新增房源后，查看房源详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings/rooms/$room_id
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.id
+        - $room_id
+    -   eq:
+        - body.buildingId
+        - $building_id
+    -   eq:
+        - body.buildingName
+        - 测试楼宇
+    -   eq:
+        - body.floor
+        - '1'
+    -   eq:
+        - body.roomNumber
+        - $room_number
+    -   eq:
+        - body.areaSize
+        - $areaSize
+    -   eq:
+        - body.marketingAvailable
+        - true
+    -   eq:
+        - body.spaceType
+        - ROOM
+
+-   name: 获取房源详情--租赁效益
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/rooms/$room_id/occupancy
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.roomId
+        - $room_id
+#   计租率
+    -   eq:
+        - body.averageOccupancyRate
+        - 0.0
+#   计租天数
+    -   eq:
+        - body.occupiedDaysCount
+        - 0
+#   空置天数
+    -   eq:
+        - body.vacantDaysCount
+        - 244
+
+-   name: 删除房源
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        method: DELETE
+        url: ${ENV(api_url)}/buildings/$building_id/rooms/$room_id
+    validate:
+    -   eq:
+        - status_code
+        - 204

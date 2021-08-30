@@ -1,0 +1,88 @@
+config:
+    name: 获取集合列表详情
+    variables:
+        access_token: ${get_token()}
+teststeps:
+-   name: 集合列表详情---房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: '0'
+            portfolioType: COLLECTION
+            size: '1000'
+            statisticSpaceType: ROOM
+        url: ${ENV(api_url)}/buildings/portfolios
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.numberOfManagement
+        - 1600.0
+    -   eq:
+        - content.totalRoomCount
+        - 10
+    -   eq:
+        - content.numberOfAvailable
+        - 700.0
+    -   eq:
+        - content.totalAvailableRoomCount
+        - 5
+
+-   name: 集合列表详情---工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: '0'
+            portfolioType: COLLECTION
+            size: '1000'
+            statisticSpaceType: CUBICLE
+        url: ${ENV(api_url)}/buildings/portfolios
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.numberOfManagement
+        - 36
+    -   eq:
+        - content.totalRoomCount
+        - 7
+    -   eq:
+        - content.numberOfAvailable
+        - 20
+    -   eq:
+        - content.totalAvailableRoomCount
+        - 3
+
+-   name: 集合列表详情---房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: '0'
+            portfolioType: COLLECTION
+            size: '1000'
+            statisticSpaceType: ALL
+        url: ${ENV(api_url)}/buildings/portfolios
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.numberOfManagement
+        - 1960
+    -   eq:
+        - content.totalRoomCount
+        - 17
+    -   eq:
+        - content.numberOfAvailable
+        - 900.0
+    -   eq:
+        - content.totalAvailableRoomCount
+        - 8

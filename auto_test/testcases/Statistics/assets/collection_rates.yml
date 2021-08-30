@@ -1,0 +1,69 @@
+config:
+    name: 数据舱--收缴率
+    variables:
+        access_token: ${get_token()}
+        endDate: '2021-12-31'
+        startDate: '2021-01-01'
+    verify: false
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 收缴率--按月查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: MONTH
+            billTypes: '租金,物业费'
+        url: ${ENV(api_url)}/assets/collection-rates
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 收缴率--按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: QUARTER
+            billTypes: '租金,物业费'
+        url: ${ENV(api_url)}/assets/collection-rates
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 收缴率--按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: YEAR
+            billTypes: '租金,物业费'
+        url: ${ENV(api_url)}/assets/collection-rates
+    validate:
+    -   eq:
+        - status_code
+        - 200

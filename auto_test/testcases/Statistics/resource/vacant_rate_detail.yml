@@ -1,0 +1,129 @@
+config:
+    name: 数据舱-效益流失率-查看详情
+    variables:
+        month_beginDate: '2021-07-01'
+        month_endDate: '2021-07-31'
+        quarter_beginDate: '2021-07-01'
+        quarter_endDate: '2021-09-30'
+        year_beginDate: '2021-01-01'
+        year_endDate: '2021-12-31'
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 数据舱-效益流失率-房源-月详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            size: '100'
+            page: '0'
+            beginDate: $month_beginDate
+            endDate: $month_endDate
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/data-statistics/resource/rooms/vacant-rate/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-效益流失率-工位-月详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            size: '100'
+            page: '0'
+            beginDate: $month_beginDate
+            endDate: $month_endDate
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/data-statistics/resource/rooms/vacant-rate/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-效益流失率-房源-季详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            size: '100'
+            page: '0'
+            beginDate: $quarter_beginDate
+            endDate: $quarter_endDate
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/data-statistics/resource/rooms/vacant-rate/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-效益流失率-工位-季详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            size: '100'
+            page: '0'
+            beginDate: $quarter_beginDate
+            endDate: $quarter_endDate
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/data-statistics/resource/rooms/vacant-rate/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-效益流失率-房源-年详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            size: '100'
+            page: '0'
+            beginDate: $year_beginDate
+            endDate: $year_endDate
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/data-statistics/resource/rooms/vacant-rate/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 数据舱-效益流失率-工位-年详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            size: '100'
+            page: '0'
+            beginDate: $year_beginDate
+            endDate: $year_endDate
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/data-statistics/resource/rooms/vacant-rate/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200

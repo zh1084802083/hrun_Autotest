@@ -1,0 +1,63 @@
+config:
+    name: 数据舱--收益
+    variables:
+        access_token: ${get_token()}
+        endDate: '2021-12-31'
+        startDate: '2021-01-01'
+    verify: false
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 收益--按月查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+            billTypes: '租金,物业费'
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 收益--按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: '租金,物业费'
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 收益--按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: '租金,物业费'
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200

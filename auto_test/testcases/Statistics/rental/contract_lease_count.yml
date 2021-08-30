@@ -1,0 +1,125 @@
+config:
+    name: 数据舱--全年退租合同份数/面积/工位数
+    variables:
+        endDate: '2021-12-31'
+        startDate: '2021-01-01'
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 全年退租合同份数--房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            churnType: LEASE_EXPIRED,RENT_OUT_EARLY
+            endDate: $endDate
+            startDate: $startDate
+            statisticSpaceType: ROOM
+            statisticsType: CONTRACT_COUNT
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/growth-churn-ratio
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 全年退租合同面积--房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            churnType: LEASE_EXPIRED,RENT_OUT_EARLY
+            endDate: $endDate
+            startDate: $startDate
+            statisticSpaceType: ROOM
+            statisticsType: AREA_SIZE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/growth-churn-ratio
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 全年退租合同份数--工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            churnType: LEASE_EXPIRED,RENT_OUT_EARLY
+            endDate: $endDate
+            startDate: $startDate
+            statisticSpaceType: CUBICLE
+            statisticsType: CONTRACT_COUNT
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/growth-churn-ratio
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 全年退租工位数--工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            churnType: LEASE_EXPIRED,RENT_OUT_EARLY
+            endDate: $endDate
+            startDate: $startDate
+            statisticSpaceType: CUBICLE
+            statisticsType: AREA_SIZE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/growth-churn-ratio
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 全年退租合同份数--房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            churnType: LEASE_EXPIRED,RENT_OUT_EARLY
+            endDate: $endDate
+            startDate: $startDate
+            statisticSpaceType: ALL
+            statisticsType: CONTRACT_COUNT
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/growth-churn-ratio
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 全年退租合同面积--房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            churnType: LEASE_EXPIRED,RENT_OUT_EARLY
+            endDate: $endDate
+            startDate: $startDate
+            statisticSpaceType: ALL
+            statisticsType: AREA_SIZE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/growth-churn-ratio
+    validate:
+    -   eq:
+        - status_code
+        - 200

@@ -1,0 +1,32 @@
+config:
+    name: 获取项目列表
+    variables:
+        access_token: ${get_token()}
+teststeps:
+-   name: 项目列表
+    variables:
+        access_token: $access_token
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings/portfolios/list
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.id
+        - 9405
+    -   eq:
+        - content.name
+        - 龙湖冠寓
+    -   eq:
+        - content.type
+        - COMPANY
+    -   eq:
+        - content.buildings
+        - null
+    -   eq:
+        - content.queue
+        - 0

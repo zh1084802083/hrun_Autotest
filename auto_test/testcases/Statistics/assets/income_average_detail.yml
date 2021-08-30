@@ -1,0 +1,228 @@
+config:
+    name: 数据舱-平效/计租均价-查看详情
+    variables:
+        month_beginDate: '2021-07-01'
+        month_endDate: '2021-07-31'
+        quarter_beginDate: '2021-07-01'
+        quarter_endDate: '2021-09-30'
+        year_beginDate: '2021-01-01'
+        year_endDate: '2021-12-31'
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 数据舱-平效/计租均价-房源(房源)-月详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $month_beginDate
+            endDate: $month_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            statisticFineness: ROOM
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100
+
+-   name: 数据舱-平效/计租均价-房源(楼层)-月详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $month_beginDate
+            endDate: $month_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            statisticFineness: FLOOR
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100
+
+-   name: 数据舱-平效/计租均价-工位-月详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $month_beginDate
+            endDate: $month_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: CUBICLE
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100
+
+-   name: 数据舱-平效/计租均价-房源(房源)-季详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $quarter_beginDate
+            endDate: $quarter_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            statisticFineness: ROOM
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100
+
+-   name: 数据舱-平效/计租均价-房源(楼层)-季详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $quarter_beginDate
+            endDate: $quarter_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            statisticFineness: FLOOR
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100
+
+-   name: 数据舱-平效/计租均价-工位-季详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $quarter_beginDate
+            endDate: $quarter_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: CUBICLE
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100
+
+-   name: 数据舱-平效/计租均价-房源(房源)-年详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $year_beginDate
+            endDate: $year_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            statisticFineness: ROOM
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100
+
+-   name: 数据舱-平效/计租均价-房源(楼层)-年详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $year_beginDate
+            endDate: $year_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: ROOM
+            statisticFineness: FLOOR
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100
+
+-   name: 数据舱-平效/计租均价-工位-年详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billTypes: 租金
+            buildingIds: $building_id
+            beginDate: $year_beginDate
+            endDate: $year_endDate
+            page: '0'
+            size: '100'
+            statisticSpaceType: CUBICLE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.size
+        - 100

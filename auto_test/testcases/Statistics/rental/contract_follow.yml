@@ -1,0 +1,99 @@
+config:
+    name: 数据舱--合同跟进分布
+    variables:
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 合同跟进分布--房源--房源面积
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            statisticsType: AREA_SIZE
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/contract/follow
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 合同跟进分布--工位--房源工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            statisticsType: AREA_SIZE
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/contract/follow
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 合同跟进分布--房源+工位--房源面积
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            statisticsType: AREA_SIZE
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/contract/follow
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 合同跟进分布--房源--合同数
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            statisticsType: CONTRACT_COUNT
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/contract/follow
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 合同跟进分布--工位--合同数
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            statisticsType: CONTRACT_COUNT
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/contract/follow
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 合同跟进分布--房源+工位--合同数
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            statisticsType: CONTRACT_COUNT
+        url: ${ENV(api_url)}/data-statistics/rent-analyze/contract/follow
+    validate:
+    -   eq:
+        - status_code
+        - 200

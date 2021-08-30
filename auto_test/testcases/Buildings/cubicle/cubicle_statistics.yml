@@ -1,0 +1,27 @@
+config:
+    name: 获取工位列表--工位数据概览
+    variables:
+        access_token: ${get_token()}
+    verify: false
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 工位数据概览
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            loadOccupancyInfo: 'false'
+            loadRentingInfo: 'false'
+            spaceType: CUBICLE
+            spaceTypes: CUBICLE
+        url: ${ENV(api_url)}/buildings/room/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200

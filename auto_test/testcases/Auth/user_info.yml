@@ -1,0 +1,34 @@
+config:
+    name: 获取用户信息
+    variables:
+        access_token: ${get_token()}
+    export:
+        - customerId
+teststeps:
+-   name: 获取用户数据
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/users/info?
+    extract:
+        - customerId: content.customerId
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.id
+        - 4990
+    -   eq:
+        - content.authUserId
+        - 1020993
+    -   eq:
+        - content.status
+        - NORMAL
+    -   eq:
+        - content.role
+        - CUSTOMER_MASTER
+    -   eq:
+        - content.userTel
+        - '13787340624'

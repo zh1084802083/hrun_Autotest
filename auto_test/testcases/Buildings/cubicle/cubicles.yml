@@ -1,0 +1,53 @@
+config:
+    name: 空间管理--工位列表
+    variables:
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 获取工位列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '100'
+        url: ${ENV(api_url)}/buildings/cubicles
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取可招商工位列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '100'
+            marketingStatus: true
+        url: ${ENV(api_url)}/buildings/cubicles
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取不可招商工位列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '100'
+            marketingStatus: false
+        url: ${ENV(api_url)}/buildings/cubicles
+    validate:
+    -   eq:
+        - status_code
+        - 200

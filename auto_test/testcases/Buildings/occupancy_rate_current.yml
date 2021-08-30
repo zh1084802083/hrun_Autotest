@@ -1,0 +1,62 @@
+config:
+    name: 当前计租率
+    variables:
+        beginDate: '2021-01-01'
+        endDate: '2021-08-31'
+        access_token: ${get_token()}
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 当前计租率---房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            buildingIds: $building_id
+            endDate: $endDate
+            statisticSpaceType: ROOM
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/occupancy-rate
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 当前计租率---工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            buildingIds: $building_id
+            endDate: $endDate
+            statisticSpaceType: CUBICLE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/occupancy-rate
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 当前计租率---房源+工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            buildingIds: $building_id
+            endDate: $endDate
+            statisticSpaceType: ALL
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/occupancy-rate
+    validate:
+    -   eq:
+        - status_code
+        - 200

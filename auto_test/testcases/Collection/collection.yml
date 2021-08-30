@@ -1,0 +1,28 @@
+config:
+    name: 获取集合列表
+    variables:
+        access_token: ${get_token()}
+teststeps:
+-   name: 获取集合列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        method: POST
+        url: ${ENV(api_url)}/buildings/collections/list
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content[0].id
+        - 9269
+    -   eq:
+        - content[0].name
+        - 龙湖冠寓（奥体）
+    -   eq:
+        - content[1].id
+        - 9268
+    -   eq:
+        - content[1].name
+        - 龙湖冠寓

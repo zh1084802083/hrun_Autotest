@@ -1,0 +1,28 @@
+config:
+    name: 数据舱--现金流
+    variables:
+        access_token: ${get_token()}
+        month_endDate: '2021-12-31'
+        month_startDate: '2021-01-01'
+    export:
+        - building_id
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 数据舱--现金流--按月统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: $month_endDate
+            startDate: $month_startDate
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200

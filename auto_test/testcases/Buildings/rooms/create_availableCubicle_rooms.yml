@@ -1,0 +1,160 @@
+config:
+    name: 房源列表--新增可招商工位类型房源
+    variables:
+        access_token: ${get_token()}
+        room_number: ${random_int(201,299)}
+        areaSize: ${str_to_int(50)}
+        beginDate: '2021-01-01'
+        endDate: '2021-12-31'
+    verify: false
+    export:
+        - building_id
+        - room_id
+        - cubicle_count
+        - total_numberOfManagement
+        - roomCount
+        - available_roomCount
+        - available_size
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 获取房态列表数据概览
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            loadOccupancyInfo: true
+            loadRentingInfo: false
+            spaceType: ROOM
+            spaceTypes: ROOM,CUBICLE
+        url: ${ENV(api_url)}/buildings/room/statistics
+    extract:
+        - cubicle_count: content.cubicleCount
+        - total_numberOfManagement: content.numberOfManagement
+        - roomCount: content.roomCount
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取房态列表可招商工位类型房源数据概览
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            loadOccupancyInfo: true
+            loadRentingInfo: false
+            spaceType: ROOM
+            spaceTypes: CUBICLE
+            available: true
+        url: ${ENV(api_url)}/buildings/room/statistics
+    extract:
+        - available_size: content.numberOfManagement
+        - available_roomCount: content.roomCount
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 新增可招商工位类型房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        json:
+            areaSize: $areaSize
+            buildingId: $building_id
+            cubicleUpdateRequests:
+            -   marketingAvailable: 'true'
+                number: '1'
+            floorName: '2'
+            jsonData: '[{"required":false,"fieldName":"建筑面积","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"装修","fieldType":"SINGLE_SELECT","values":["不限","毛坯","简装","精装"],"systemField":true},{"required":false,"fieldName":"预租单价","fieldType":"NUMBER","systemField":true}]'
+            marketingAvailable: 'true'
+            realAreaSize: $areaSize
+            roomNumber: $room_number
+            spaceType: CUBICLE
+        method: POST
+        url: ${ENV(api_url)}/buildings/$building_id/rooms
+    extract:
+        - room_id: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 获取房态列表数据概览
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            loadOccupancyInfo: true
+            loadRentingInfo: false
+            spaceType: ROOM
+            spaceTypes: ROOM,CUBICLE
+        url: ${ENV(api_url)}/buildings/room/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.roomCount
+        - ${sum_two($roomCount, 1)}
+    -   eq:
+        - content.numberOfManagement
+        - ${sum_two($total_numberOfManagement, $areaSize)}
+    -   eq:
+        - content.cubicleCount
+        - ${sum_two($cubicle_count, 1)}
+
+-   name: 获取房态列表可招商工位类型房源数据概览
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            loadOccupancyInfo: true
+            loadRentingInfo: false
+            spaceType: ROOM
+            spaceTypes: CUBICLE
+            available: true
+        url: ${ENV(api_url)}/buildings/room/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - content.roomCount
+        - ${sum_two($available_roomCount, 1)}
+    -   eq:
+        - content.numberOfManagement
+        - ${sum_two($available_size, $areaSize)}
+    - eq:
+        - content.cubicleCount
+        - ${sum_two($cubicle_count, 1)}
+
+-   name: 删除房源
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        method: DELETE
+        url: ${ENV(api_url)}/buildings/$building_id/rooms/$room_id
+    validate:
+    -   eq:
+        - status_code
+        - 204
