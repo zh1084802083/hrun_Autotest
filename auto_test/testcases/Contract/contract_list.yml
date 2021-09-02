@@ -1,5 +1,5 @@
 config:
-    name: 合同详情
+    name: 合同列表
     variables:
         access_token: ${get_token()}
     verify: false

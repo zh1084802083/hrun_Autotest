@@ -79,7 +79,7 @@ def end_date():
 
 
 def end_180():
-    a = datetime.datetime.now()+datetime.timedelta(days=182)
+    a = datetime.datetime.now()+datetime.timedelta(days=180)
     return a.strftime('%Y-%m-%d')
 
 
