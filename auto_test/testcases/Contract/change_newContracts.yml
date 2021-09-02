@@ -1,0 +1,364 @@
+config:
+    name: 变更商业合同
+    variables:
+        access_token: ${get_token()}
+        areaSize: ${str_to_int(10)}
+        room_number: ${random_int(101,199)}
+    verify: false
+    export:
+        - room_id
+        - building_id
+        - contract_id
+        - customerId
+teststeps:
+-   name: 获取用户id
+    testcase: testcases/Auth/user_info.yml
+
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 新增可招商房源
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        json:
+            areaSize: $areaSize
+            buildingId: $building_id
+            cubicleUpdateRequests: []
+            floorName: '1'
+            jsonData: '[{"required":false,"fieldName":"建筑面积","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"装修","fieldType":"SINGLE_SELECT","values":["不限","毛坯","简装","精装"],"systemField":true},{"required":false,"fieldName":"预租单价","fieldType":"NUMBER","systemField":true}]'
+            marketingAvailable: 'true'
+            realAreaSize: $areaSize
+            roomNumber: $room_number
+            spaceType: ROOM
+        method: POST
+        url: ${ENV(api_url)}/buildings/$building_id/rooms
+    extract:
+        - room_id: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 生成房源合同租金明细
+    request:
+        headers:
+            authorization: Bearer $access_token
+        json:
+            baseTerm:
+                areaSize: $areaSize
+                calculateOrder: AREA_FIRST
+                deposit: 1
+                depositPayEnumDesc: 租金保证金
+                depositUnitEnum: MONTH
+                leaseBeginDate: ${begin_date()}
+                leaseEndDate: ${end_180()}
+                monetaryUnit: 人民币CNY
+                precisionEnum: RESULT
+                signDate: ${begin_date()}
+                spaceUnit: P
+                theoryRounded: false
+                unitPricePrecision: 2
+            depositIncreasingRates: []
+            discounts: []
+            increasingRates: []
+            leaseTerms:
+            -   calculateEnum: MONTH
+                dayNumberForYear: 365
+                deposit: false
+                intervalMonth: 1
+                leaseComputeWay: FIXED_MONEY
+                leaseDivideRoleEnum: NORMAL
+                leaseTermType: RENT
+                leaseTermTypeDesc: 租金
+                monetaryUnit: 人民币CNY
+                payInAdvanceDay: 1
+                paymentDateEnum: WORKDAY
+                price: 10
+                priceUnitEnum: D
+                termBeginDate: ${begin_date()}
+                termEndDate: ${end_180()}
+        method: POST
+        url: ${ENV(api_url)}/v2/contracts/pays
+    extract:
+        - contractPays: body
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 新建房源合同--按面积计算租金
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        json:
+            baseTerm:
+                areaSize: $areaSize
+                calculateOrder: AREA_FIRST
+                contractNo: '001'
+                leaseBeginDate: ${begin_date()}
+                leaseEndDate: ${end_180()}
+                precisionEnum: RESULT
+                signDate: ${begin_date()}
+                spaceUnit: P
+                theoryRounded: false
+                unitPricePrecision: 2
+            contractNo: '001'
+            customKeywords: []
+            expenseTerms:
+            -   areaSize: $areaSize
+                buildingType: OFFICE
+                contractExpenseTermName: 租赁条款
+                contractPays: $contractPays
+                deposit: 1
+                depositIncreasingRates: []
+                depositUnitEnum: MONTH
+                discounts: []
+                expenseTermType: RENT_TERM
+                increasingRates: []
+                itemPermission: RENT_PERMISSION
+                leaseTerms:
+                -   calculateEnum: MONTH
+                    dayNumberForYear: 365
+                    deposit: false
+                    intervalMonth: 1
+                    leaseComputeWay: FIXED_MONEY
+                    leaseDivideRoleEnum: NORMAL
+                    leaseTermType: RENT
+                    leaseTermTypeDesc: 租金
+                    monetaryUnit: 人民币CNY
+                    payInAdvanceDay: 1
+                    paymentDateEnum: WORKDAY
+                    price: 10
+                    priceUnitEnum: D
+                    termBeginDate: ${begin_date()}
+                    termEndDate: ${end_180()}
+                monetaryUnit: 人民币CNY
+                resourceIds:
+                - $room_id
+                resourceType: ROOM
+                spaceUnit: P
+                termIndex: 1
+            followId: 4990
+            followName: '13787340624'
+            jsonData: '[]'
+            legalPerson:
+                name: 李传根
+            remarkTerms: []
+            resourceIds:
+            - $room_id
+            resourceType: ROOM
+            tags: []
+            tenantId: 78327
+            tenantName: 湖南神雀网络科技有限公司
+            tenantNo: null
+        method: POST
+        url: ${ENV(api_url)}/v3/contracts?
+    extract:
+        - contract_id: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 提交合同
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        json:
+            buildingIds: [$building_id]
+            subDomainType: "NEW_APPROVAL"
+            domainType: "CONTRACT"
+            customerId: $customerId
+            description: "湖南神雀网络科技有限公司/测试楼宇/$room_number"
+            objectId: $contract_id
+        method: POST
+        url: ${ENV(api_url)}/oa/start
+    setup_hooks:
+        - ${set_contract_sh()}
+    teardown_hooks:
+        - ${wait($response,0.5)}
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 查看合同详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/v2/contracts/$contract_id
+    extract:
+        - baseTerm_new: body.baseTerm
+        - expenseTerm_id: body.expenseTerms.0.id
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 生成房源合同租金明细
+    request:
+        headers:
+            authorization: Bearer $access_token
+        json:
+            baseTerm:
+                areaSize: $areaSize
+                calculateOrder: AREA_FIRST
+                deposit: 1
+                depositPayEnumDesc: 租金保证金
+                depositUnitEnum: MONTH
+                leaseBeginDate: ${begin_date()}
+                leaseEndDate: ${end_180()}
+                monetaryUnit: 人民币CNY
+                precisionEnum: RESULT
+                signDate: ${begin_date()}
+                spaceUnit: P
+                theoryRounded: false
+                unitPricePrecision: 2
+            depositIncreasingRates: []
+            discounts: []
+            increasingRates: []
+            leaseTerms:
+            -   calculateEnum: MONTH
+                dayNumberForYear: 365
+                deposit: false
+                intervalMonth: 1
+                leaseComputeWay: FIXED_MONEY
+                leaseDivideRoleEnum: NORMAL
+                leaseTermType: RENT
+                leaseTermTypeDesc: 租金
+                monetaryUnit: 人民币CNY
+                payInAdvanceDay: 1
+                paymentDateEnum: WORKDAY
+                price: 10
+                priceUnitEnum: D
+                termBeginDate: ${begin_date()}
+                termEndDate: ${end_180()}
+        method: POST
+        url: ${ENV(api_url)}/v2/contracts/pays
+    extract:
+        - contractPays_bg: body
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 计算变更退租所需金额
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            terminationDate: ${begin_date()}
+        url: ${ENV(api_url)}/v3/contracts/$contract_id/termination/finance/term
+    extract:
+        - billList_0: body.rentals.0
+        - billList_1: body.rentals.1
+        - billList_2: body.rentals.2
+        - billList_3: body.rentals.3
+        - billList_4: body.rentals.4
+        - billList_5: body.rentals.5
+        - billList_6: body.deposits.0
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 变更房源商业条款合同--按面积计算租金
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        json:
+            attachments: []
+            newContractStartDate: ${begin_date()}
+            terminationContractCarryForward:
+                billList: [$billList_0,$billList_1,$billList_2,$billList_3,$billList_4,$billList_5,$billList_6]
+                contractId: $contract_id
+            newContract:
+                baseTerm: $baseTerm_new
+                contractNo: '001'
+                customKeywords: []
+                expenseTerms:
+                -   areaSize: 10
+                    buildingType: OFFICE
+                    contractExpenseTermName: 租赁条款
+                    contractPays: $contractPays_bg
+                    deposit: 1
+                    depositIncreasingRates: [ ]
+                    depositUnitEnum: MONTH
+                    discounts: [ ]
+                    expenseTermType: RENT_TERM
+                    id: $expenseTerm_id
+                    increasingRates: [ ]
+                    itemPermission: RENT_PERMISSION
+                    leaseTerms:
+                    -   calculateEnum: MONTH
+                        dayNumberForYear: 365
+                        deposit: false
+                        intervalMonth: 1
+                        leaseComputeWay: FIXED_MONEY
+                        leaseDivideRoleEnum: NORMAL
+                        leaseTermType: RENT
+                        leaseTermTypeDesc: 租金
+                        monetaryUnit: 人民币CNY
+                        payInAdvanceDay: 1
+                        paymentDateEnum: WORKDAY
+                        price: 10
+                        priceUnitEnum: D
+                        termBeginDate: ${begin_date()}
+                        termEndDate: ${end_180()}
+                    monetaryUnit: 人民币CNY
+                    resourceIds:
+                    - $room_id
+                    resourceType: ROOM
+                    spaceUnit: P
+                    termIndex: 1
+                followId: 4990
+                followName: '13787340624'
+                industryName: null
+                jsonData: '[]'
+                legalPerson:
+                    name: 李传根
+                remarkTerms: []
+                resourceIds:
+                - $room_id
+                resourceType: ROOM
+                tags: []
+                tenantId: 78327
+                tenantName: 湖南神雀网络科技有限公司
+                tenantNo: null
+        method: POST
+        params:
+            changeWay: TERMINATION_AND_CONSTRUCT
+            id: $contract_id
+        url: ${ENV(api_url)}/v3/contracts/change
+    extract:
+        - contract_newId: body
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 提交商业合同变更
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        json:
+            buildingIds: [$building_id]
+            subDomainType: "CHANGE_APPROVAL"
+            domainType: "CONTRACT"
+            customerId: $customerId
+            description: "湖南神雀网络科技有限公司/测试楼宇/$room_number"
+            objectId: $contract_newId
+        method: POST
+        url: ${ENV(api_url)}/oa/start
+    validate:
+    -   eq:
+        - status_code
+        - 200
