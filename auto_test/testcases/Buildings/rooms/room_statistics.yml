@@ -28,6 +28,15 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${total_roomSize()}
+    -   eq:
+        - body.roomCount
+        - ${total_roomCount()}
+    -   eq:
+        - body.cubicleCount
+        - ${total_cubileCount()}
 
 -   name: 房态列表数据概览-按房号查询
     request:
@@ -67,6 +76,12 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${room_Size()}
+    -   eq:
+        - body.roomCount
+        - ${room_Count()}
 
 -   name: 房源列表数据概览-按房号查询
     request:
@@ -106,6 +121,15 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${cubileSize()}
+    -   eq:
+        - body.roomCount
+        - ${cubicleRoom_count()}
+    -   eq:
+        - body.cubicleCount
+        - ${cubicleNum()}
 
 -   name: 工位房源数据概览-按房号查询
     request:
@@ -145,6 +169,15 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${room_cubicleSize()}
+    -   eq:
+        - body.roomCount
+        - ${room_cubicleCount()}
+    -   eq:
+        - body.cubicleCount
+        - ${room_cubicleNum()}
 
 -   name: 房源、工位房源数据概览-按房号查询
     request:

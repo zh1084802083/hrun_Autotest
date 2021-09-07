@@ -13,7 +13,6 @@ config:
         - assert_totalSize
         - available_size
         - room_id
-        - roomCount
 teststeps:
 -   name: 获取楼宇id
     testcase: testcases/Buildings/buildings.yml
@@ -164,7 +163,7 @@ teststeps:
         - $available_size
     -   eq:
         - content.roomCountTotal
-        - ${sum_two($roomCount, 1)}
+        - ${sum_two($total_roomCount, 1)}
 
 -   name: 删除房源
     request:

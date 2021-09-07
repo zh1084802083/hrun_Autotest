@@ -16,13 +16,33 @@ teststeps:
         method: GET
         params:
             page: 0
-            size: 20
+            size: 1000
             beginDate: '2021-01-01'
             endDate: '2021-12-31'
             loadOccupancyInfo: true
             loadRentingInfo: false
             buildingIds: $building_id
             spaceTypes: ROOM,CUBICLE
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 获取房源列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: 0
+            size: 1000
+            beginDate: '2021-01-01'
+            endDate: '2021-12-31'
+            loadOccupancyInfo: false
+            loadRentingInfo: true
+            buildingIds: $building_id
+            spaceTypes: ROOM
         url: ${ENV(api_url)}/buildings/rooms
     validate:
     -   eq:
