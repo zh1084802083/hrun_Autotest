@@ -48,6 +48,7 @@ class TestCaseRoomStatistics(HttpRunner):
             .assert_equal("status_code", 200)
             .assert_equal("body.numberOfManagement", "${total_roomSize()}")
             .assert_equal("body.roomCount", "${total_roomCount()}")
+            .assert_equal("body.cubicleCount", "${total_cubileCount()}")
         ),
         Step(
             RunRequest("房态列表数据概览-按房号查询")
@@ -85,6 +86,8 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${room_Size()}")
+            .assert_equal("body.roomCount", "${room_Count()}")
         ),
         Step(
             RunRequest("房源列表数据概览-按房号查询")
@@ -122,6 +125,9 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${cubileSize()}")
+            .assert_equal("body.roomCount", "${cubicleRoom_count()}")
+            .assert_equal("body.cubicleCount", "${cubicleNum()}")
         ),
         Step(
             RunRequest("工位房源数据概览-按房号查询")
@@ -159,6 +165,9 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${room_cubicleSize()}")
+            .assert_equal("body.roomCount", "${room_cubicleCount()}")
+            .assert_equal("body.cubicleCount", "${room_cubicleNum()}")
         ),
         Step(
             RunRequest("房源、工位房源数据概览-按房号查询")
@@ -197,6 +206,9 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${available_roomSize()}")
+            .assert_equal("body.roomCount", "${available_roomCount()}")
+            .assert_equal("body.cubicleCount", "${available_roomNum()}")
         ),
         Step(
             RunRequest("可招商房源数据概览-按房号查询")
@@ -236,6 +248,9 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${available_cubicleSize()}")
+            .assert_equal("body.roomCount", "${available_cubicleCount()}")
+            .assert_equal("body.cubicleCount", "${available_cubicleNum()}")
         ),
         Step(
             RunRequest("可招商工位房源数据概览-按房号查询")
@@ -275,6 +290,9 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${available_room_totalSize()}")
+            .assert_equal("body.roomCount", "${available_room_tatalCount()}")
+            .assert_equal("body.cubicleCount", "${available_room_totalNum()}")
         ),
         Step(
             RunRequest("可招商房源、工位房源数据概览-按房号查询")
@@ -314,6 +332,9 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${unavailable_room_Size()}")
+            .assert_equal("body.roomCount", "${unavailable_room_Count()}")
+            .assert_equal("body.cubicleCount", "${unavailable_room_Num()}")
         ),
         Step(
             RunRequest("房源列表-不可招商房源数据概览-按房号查询")
@@ -353,6 +374,9 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${unavailable_cubicle_Size()}")
+            .assert_equal("body.roomCount", "${unavailable_cubicle_Count()}")
+            .assert_equal("body.cubicleCount", "${unavailable_cubicle_Num()}")
         ),
         Step(
             RunRequest("房源列表-不可招商工位房源数据概览-按房号查询")
@@ -392,6 +416,9 @@ class TestCaseRoomStatistics(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body.numberOfManagement", "${unavailable_room_totalSize()}")
+            .assert_equal("body.roomCount", "${unavailable_room_totalCount()}")
+            .assert_equal("body.cubicleCount", "${unavailable_room_totalNum()}")
         ),
         Step(
             RunRequest("房源列表-不可招商房源、工位房源数据概览-按房号查询")

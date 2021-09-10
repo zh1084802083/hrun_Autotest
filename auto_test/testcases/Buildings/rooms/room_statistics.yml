@@ -218,6 +218,16 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${available_roomSize()}
+    -   eq:
+        - body.roomCount
+        - ${available_roomCount()}
+    -   eq:
+        - body.cubicleCount
+        - ${available_roomNum()}
+
 
 -   name: 可招商房源数据概览-按房号查询
     request:
@@ -259,6 +269,15 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${available_cubicleSize()}
+    -   eq:
+        - body.roomCount
+        - ${available_cubicleCount()}
+    -   eq:
+        - body.cubicleCount
+        - ${available_cubicleNum()}
 
 -   name: 可招商工位房源数据概览-按房号查询
     request:
@@ -300,6 +319,15 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${available_room_totalSize()}
+    -   eq:
+        - body.roomCount
+        - ${available_room_tatalCount()}
+    -   eq:
+        - body.cubicleCount
+        - ${available_room_totalNum()}
 
 -   name: 可招商房源、工位房源数据概览-按房号查询
     request:
@@ -341,6 +369,15 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${unavailable_room_Size()}
+    -   eq:
+        - body.roomCount
+        - ${unavailable_room_Count()}
+    -   eq:
+        - body.cubicleCount
+        - ${unavailable_room_Num()}
 
 -   name: 房源列表-不可招商房源数据概览-按房号查询
     request:
@@ -382,6 +419,15 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${unavailable_cubicle_Size()}
+    -   eq:
+        - body.roomCount
+        - ${unavailable_cubicle_Count()}
+    -   eq:
+        - body.cubicleCount
+        - ${unavailable_cubicle_Num()}
 
 -   name: 房源列表-不可招商工位房源数据概览-按房号查询
     request:
@@ -423,6 +469,15 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${unavailable_room_totalSize()}
+    -   eq:
+        - body.roomCount
+        - ${unavailable_room_totalCount()}
+    -   eq:
+        - body.cubicleCount
+        - ${unavailable_room_totalNum()}
 
 -   name: 房源列表-不可招商房源、工位房源数据概览-按房号查询
     request:
