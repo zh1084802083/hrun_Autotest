@@ -2,6 +2,8 @@ config:
     name: 删除工位
     variables:
         access_token: ${get_token()}
+        room_number: ${random_int(201,299)}
+        areaSize: ${str_to_int(20)}
     verify: false
     export:
         - building_id
@@ -67,12 +69,13 @@ teststeps:
         url: ${ENV(api_url)}/buildings/cubicles
     extract:
         - cubicle_id: content.content[0].id
+        - cubicle_count: body.length(content)
     validate:
     -   eq:
         - status_code
         - 200
 
--   name: 删除工位
+-   name: 工位列表-删除工位
     request:
         headers:
             accept: application/json
@@ -83,6 +86,23 @@ teststeps:
     -   eq:
         - status_code
         - 200
+
+-   name: 删除工位后，检查工位数
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            size: '100'
+        url: ${ENV(api_url)}/buildings/cubicles
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.length(content)
+        - ${reduce_two($cubicle_count, 1)}
 
 -   name: 获取工位类型房源中的工位
     request:
@@ -97,7 +117,7 @@ teststeps:
         - status_code
         - 200
 
--   name: 删除工位
+-   name: 房源列表-删除工位
     request:
         headers:
             accept: application/json

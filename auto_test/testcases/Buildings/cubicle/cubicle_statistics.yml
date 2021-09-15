@@ -5,9 +5,12 @@ config:
     verify: false
     export:
         - building_id
+        - total_cubicle
+        - available_cubicle
+        - unavailable_cubicle
 teststeps:
--   name: 获取楼宇id
-    testcase: testcases/Buildings/buildings.yml
+-   name: 获取工位列表
+    testcase: testcases/Buildings/cubicle/cubicles.yml
 
 -   name: 工位数据概览
     request:
@@ -20,6 +23,87 @@ teststeps:
             loadRentingInfo: 'false'
             spaceType: CUBICLE
             spaceTypes: CUBICLE
+        url: ${ENV(api_url)}/buildings/room/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${cubileSize()}
+    -   eq:
+        - body.roomCount
+        - ${cubicleRoom_count()}
+    -   eq:
+        - body.cubicleCount
+#        - ${total_cubicle()}
+        - $total_cubicle
+-   name: 可招商工位数据概览
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            loadOccupancyInfo: 'false'
+            loadRentingInfo: 'false'
+            spaceType: CUBICLE
+            spaceTypes: CUBICLE
+            available: true
+        url: ${ENV(api_url)}/buildings/room/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${available_cubicleSize()}
+    -   eq:
+        - body.roomCount
+        - ${available_cubicleCount()}
+    -   eq:
+        - body.cubicleCount
+#        - ${available_cubicle()}
+        - $available_cubicle
+-   name: 不可招商工位数据概览
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            loadOccupancyInfo: 'false'
+            loadRentingInfo: 'false'
+            spaceType: CUBICLE
+            spaceTypes: CUBICLE
+            available: false
+        url: ${ENV(api_url)}/buildings/room/statistics
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.numberOfManagement
+        - ${unavailable_cubicle_Size()}
+    -   eq:
+        - body.roomCount
+        - ${unavailable_cubicle_Count()}
+    -   eq:
+        - body.cubicleCount
+#        - ${unavailable_cubicle()}
+        - $unavailable_cubicle
+-   name: 工位数据概览-按工位编号查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            loadOccupancyInfo: 'false'
+            loadRentingInfo: 'false'
+            spaceType: CUBICLE
+            spaceTypes: CUBICLE
+            keyword: 1
         url: ${ENV(api_url)}/buildings/room/statistics
     validate:
     -   eq:

@@ -98,26 +98,6 @@ teststeps:
         - content.cubicleCount
         - ${sum_two($cubicleCount, 1)}
 
--   name: 新增工位后，查询工位数据概览
-    request:
-        headers:
-            authorization: Bearer $access_token
-        method: GET
-        params:
-            buildingIds: $building_id
-            loadOccupancyInfo: 'false'
-            loadRentingInfo: 'false'
-            spaceType: CUBICLE
-            spaceTypes: CUBICLE
-        url: ${ENV(api_url)}/buildings/room/statistics
-    validate:
-    -   eq:
-        - status_code
-        - 200
-    -   eq:
-        - body.cubicleCount
-        - ${sum_two($cubicleCount, 1)}
-
 -   name: 新增工位后，获取工位列表
     request:
         headers:

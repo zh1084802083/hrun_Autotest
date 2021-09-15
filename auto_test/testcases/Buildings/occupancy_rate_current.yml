@@ -2,7 +2,7 @@ config:
     name: 当前计租率
     variables:
         beginDate: '2021-01-01'
-        endDate: '2021-08-31'
+        endDate: ${begin_date()}
         access_token: ${get_token()}
     export:
         - building_id

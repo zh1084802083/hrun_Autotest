@@ -71,32 +71,6 @@ teststeps:
         - body.spaceType
         - ROOM
 
--   name: 获取房源详情--租赁效益
-    request:
-        headers:
-            authorization: Bearer $access_token
-        method: GET
-        url: ${ENV(api_url)}/data-statistics/rent-analyze/rooms/$room_id/occupancy
-    validate:
-    -   eq:
-        - status_code
-        - 200
-    -   eq:
-        - body.roomId
-        - $room_id
-#   计租率
-    -   eq:
-        - body.averageOccupancyRate
-        - 0.0
-#   计租天数
-    -   eq:
-        - body.occupiedDaysCount
-        - 0
-#   空置天数
-    -   eq:
-        - body.vacantDaysCount
-        - 244
-
 -   name: 删除房源
     request:
         headers:

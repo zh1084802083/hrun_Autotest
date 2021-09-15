@@ -58,7 +58,6 @@ def room_test(data):
     body = response.json()['content']
     sum_areaSize = 0
     sum_cubicle = 0
-    sum_cubicle_size = 0
     for i in range(len(body)):
         room_size = body[i]['realAreaSize']
         sum_areaSize = room_size + sum_areaSize
@@ -134,11 +133,9 @@ def room_cubicleNum():
 
 # 获取工位类型房源列表内房源面积、房源数量、工位数量
 def cubicle_room():
-    data= {
+    data = {
         'page': 0,
         'size': 1000,
-        'beginDate': '2021-01-01',
-        'endDate': '2021-12-31',
         'loadOccupancyInfo': 'false',
         'loadRentingInfo': 'true',
         'buildingIds': 21568,
@@ -154,8 +151,8 @@ def cubileSize():
 
 
 def cubicleRoom_count():
-    cubicle_room_rount = cubicle_room()[1]
-    return cubicle_room_rount
+    cubicle_room_count = cubicle_room()[1]
+    return cubicle_room_count
 
 
 def cubicleNum():
@@ -407,6 +404,10 @@ def get_httprunner_version():
 
 def sum_two(m, n):
     return m + n
+
+
+def reduce_two(m, n):
+    return m - n
 
 
 def begin_date():

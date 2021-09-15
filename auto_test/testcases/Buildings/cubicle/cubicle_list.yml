@@ -4,6 +4,9 @@ config:
         access_token: ${get_token()}
     export:
         - building_id
+        - total_cubicle
+        - available_cubicle
+        - unavailable_cubicle
 teststeps:
 -   name: 获取楼宇id
     testcase: testcases/Buildings/buildings.yml
@@ -17,6 +20,8 @@ teststeps:
             buildingIds: $building_id
             size: '100'
         url: ${ENV(api_url)}/buildings/cubicles
+    extract:
+        - total_cubicle: body.length(content)
     validate:
     -   eq:
         - status_code
@@ -32,6 +37,8 @@ teststeps:
             size: '100'
             marketingStatus: true
         url: ${ENV(api_url)}/buildings/cubicles
+    extract:
+        - available_cubicle: body.length(content)
     validate:
     -   eq:
         - status_code
@@ -47,6 +54,8 @@ teststeps:
             size: '100'
             marketingStatus: false
         url: ${ENV(api_url)}/buildings/cubicles
+    extract:
+        - unavailable_cubicle: body.length(content)
     validate:
     -   eq:
         - status_code

@@ -36,6 +36,26 @@ teststeps:
         - status_code
         - 201
 
+-   name: 获取房源列表
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: 0
+            size: 1000
+            loadOccupancyInfo: false
+            loadRentingInfo: true
+            buildingIds: $building_id
+            spaceTypes: ROOM
+        url: ${ENV(api_url)}/buildings/rooms
+    extract:
+        - room_count: body.length(content)
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
 -   name: 删除房源
     request:
         headers:
@@ -47,3 +67,24 @@ teststeps:
     -   eq:
         - status_code
         - 204
+
+-   name: 删除房源后，检查房源数量
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            page: 0
+            size: 1000
+            loadOccupancyInfo: false
+            loadRentingInfo: true
+            buildingIds: $building_id
+            spaceTypes: ROOM
+        url: ${ENV(api_url)}/buildings/rooms
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.length(content)
+        - ${reduce_two($room_count, 1)}
