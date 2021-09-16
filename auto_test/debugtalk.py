@@ -410,6 +410,10 @@ def reduce_two(m, n):
     return m - n
 
 
+def division_two(m, n):
+    return m / n
+
+
 def begin_date():
     return datetime.datetime.now().strftime('%Y-%m-%d')
 

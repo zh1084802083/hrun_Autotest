@@ -9,19 +9,64 @@ class TestCaseBuildings(HttpRunner):
 
     config = (
         Config("楼宇列表")
-        .variables(**{"access_token": "${get_token()}"})
+        .variables(
+            **{
+                "access_token": "${get_token()}",
+                "building_num": "${random_int(1, 1000)}",
+            }
+        )
         .export(*["building_id"])
     )
 
     teststeps = [
         Step(
-            RunRequest("楼宇列表信息")
-            .get("${ENV(api_url)}/buildings")
-            .with_headers(**{"authorization": "Bearer $access_token"})
+            RunRequest("创建楼宇")
+            .post("${ENV(api_url)}/buildings")
+            .with_headers(
+                **{
+                    "authorization": "Bearer $access_token",
+                    "content-type": "application/json; charset=utf-8",
+                }
+            )
+            .with_json(
+                {
+                    "address": "浙江省杭州市萧山区启迪路198号",
+                    "areaName": "萧山区",
+                    "cityName": "杭州市",
+                    "constructionArea": 10000,
+                    "imageUrl": "/2021/09/2705d1a6-ccf3-4633-a172-84f2adc7527f.jpeg",
+                    "jsonData": '[{"required":false,"fieldName":"所有权人","desc":"所有权人","fieldType":"SINGLE_TEXT","systemField":true},{"required":false,"fieldName":"楼宇建筑面积","desc":"楼宇建筑面积","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"占地面积","desc":"占地面积","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"用途","desc":"用途","fieldType":"SINGLE_TEXT","systemField":true},{"required":false,"fieldName":"土地年限","desc":"土地年限","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"招商联系电话","desc":"招商联系电话","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"建成时间","desc":"建成时间","fieldType":"DATE_SELECT","systemField":true,"content":"2021-09-16T06:47:39.589Z"}]',
+                    "lat": 30.20353118,
+                    "lng": 120.247490381,
+                    "name": "自动化测试楼宇-$building_num",
+                    "provinceName": "浙江省",
+                    "searchKeywords": "杭州湾信息港",
+                    "tags": [],
+                }
+            )
             .extract()
-            .with_jmespath("body.items[0].id", "building_id")
+            .with_jmespath("body.id", "building_id")
             .validate()
-            .assert_equal("status_code", 200)
+            .assert_equal("status_code", 201)
+        ),
+        Step(
+            RunRequest("创建楼层")
+            .post("${ENV(api_url)}/buildings/$building_id/floors")
+            .with_headers(
+                **{
+                    "authorization": "Bearer $access_token",
+                    "content-type": "application/json; charset=utf-8",
+                }
+            )
+            .with_json(
+                [
+                    {"_key": 0, "active": True, "floor": "1", "queue": 0},
+                    {"_key": 1, "active": True, "floor": "2", "queue": 1},
+                    {"_key": 2, "active": True, "floor": "3", "queue": 2},
+                ]
+            )
+            .validate()
+            .assert_equal("status_code", 201)
         ),
     ]
 

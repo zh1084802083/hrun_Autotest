@@ -2,8 +2,8 @@ config:
     name: 数据舱-资产评估-现金流
     variables:
         access_token: ${get_token()}
-        month_endDate: '2021-12-31'
-        month_startDate: '2021-01-01'
+        endDate: '2021-12-31'
+        startDate: '2021-01-01'
     export:
         - building_id
         - payedAmount_in
@@ -12,28 +12,15 @@ config:
         - carryInAmount_in_1
         - payedAmount_in_2
         - carryInAmount_in_2
-        - payedAmount_in_3
-        - carryInAmount_in_3
         - payedAmount_out
         - carryInAmount_out
         - payedAmount_out_1
         - carryInAmount_out_1
         - payedAmount_out_2
         - carryInAmount_out_2
-        - payedAmount_out_3
-        - carryInAmount_out_3
-        - billId_in_1
-        - billId_in_2
-        - billId_in_3
-        - billId_out_1
-        - billId_out_2
-        - billId_out_3
 teststeps:
--   name: 添加账单收入数据
-    testcase: testcases/Account/create_bills_in.yml
-
--   name: 添加账单支出数据
-    testcase: testcases/Account/create_bills_out.yml
+-   name: 添加账单收入、支出数据
+    testcase: testcases/Account/create_bills.yml
 
 -   name: 资产评估--现金流--按租金、月统计
     setup_hooks:
@@ -46,8 +33,8 @@ teststeps:
         params:
             buildingIds: $building_id
             domainTypes: CASH_MATCH
-            endDate: $month_endDate
-            startDate: $month_startDate
+            endDate: $endDate
+            startDate: $startDate
             temporalUnit: MONTH
             billTypes: 租金
         url: ${ENV(api_url)}/assets/cashflows
@@ -65,7 +52,7 @@ teststeps:
         - body[8].worthAmount
         - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
 
--   name: 资产评估--现金流--按租金保证金、月统计
+-   name: 资产评估--现金流--按租金+租金保证金、月统计
     setup_hooks:
         - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
         - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
@@ -76,10 +63,10 @@ teststeps:
         params:
             buildingIds: $building_id
             domainTypes: CASH_MATCH
-            endDate: $month_endDate
-            startDate: $month_startDate
+            endDate: $endDate
+            startDate: $startDate
             temporalUnit: MONTH
-            billTypes: 租金保证金
+            billTypes: 租金,租金保证金
         url: ${ENV(api_url)}/assets/cashflows
     validate:
     -   eq:
@@ -95,36 +82,6 @@ teststeps:
         - body[8].worthAmount
         - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
 
--   name: 资产评估--现金流--按物业费、月统计
-    setup_hooks:
-        - incomeAmount_expect_3: ${sum_two($payedAmount_in_3, $carryInAmount_in_3)}
-        - Amount_out_3: ${sum_two($payedAmount_out_3, $carryInAmount_out_3)}
-    request:
-        headers:
-            authorization: Bearer $access_token
-        method: GET
-        params:
-            buildingIds: $building_id
-            domainTypes: CASH_MATCH
-            endDate: $month_endDate
-            startDate: $month_startDate
-            temporalUnit: MONTH
-            billTypes: 物业费
-        url: ${ENV(api_url)}/assets/cashflows
-    validate:
-    -   eq:
-        - status_code
-        - 200
-    -   eq:
-        - body[8].costAmount
-        - $Amount_out_3
-    -   eq:
-        - body[8].incomeAmount
-        - $incomeAmount_expect_3
-    -   eq:
-        - body[8].worthAmount
-        - ${reduce_two($incomeAmount_expect_3, $Amount_out_3)}
-
 -   name: 资产评估--现金流--按月统计
     setup_hooks:
         - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
@@ -136,8 +93,8 @@ teststeps:
         params:
             buildingIds: $building_id
             domainTypes: CASH_MATCH
-            endDate: $month_endDate
-            startDate: $month_startDate
+            endDate: $endDate
+            startDate: $startDate
             temporalUnit: MONTH
         url: ${ENV(api_url)}/assets/cashflows
     validate:
@@ -154,18 +111,392 @@ teststeps:
         - body[8].worthAmount
         - ${reduce_two($incomeAmount_expect, $Amount_out)}
 
--   name: 批量解除收入流水
+-   name: 资产评估--现金流--按租金、季度统计
+    setup_hooks:
+        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
+        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body[2].costAmount
+        - $Amount_out_1
+    -   eq:
+        - body[2].incomeAmount
+        - $incomeAmount_expect_1
+    -   eq:
+        - body[2].worthAmount
+        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+
+-   name: 资产评估--现金流--按租金+租金保证金、季度统计
+    setup_hooks:
+        - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
+        - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body[2].costAmount
+        - $Amount_out_2
+    -   eq:
+        - body[2].incomeAmount
+        - $incomeAmount_expect_2
+    -   eq:
+        - body[2].worthAmount
+        - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
+
+-   name: 资产评估--现金流--按季度统计
+    setup_hooks:
+        - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
+        - Amount_out: ${sum_two($payedAmount_out, $carryInAmount_out)}
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body[2].costAmount
+        - $Amount_out
+    -   eq:
+        - body[2].incomeAmount
+        - $incomeAmount_expect
+    -   eq:
+        - body[2].worthAmount
+        - ${reduce_two($incomeAmount_expect, $Amount_out)}
+
+-   name: 资产评估--现金流--按租金、年统计
+    setup_hooks:
+        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
+        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body[0].costAmount
+        - $Amount_out_1
+    -   eq:
+        - body[0].incomeAmount
+        - $incomeAmount_expect_1
+    -   eq:
+        - body[0].worthAmount
+        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+
+-   name: 资产评估--现金流--按租金+租金保证金、年统计
+    setup_hooks:
+        - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
+        - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body[0].costAmount
+        - $Amount_out_2
+    -   eq:
+        - body[0].incomeAmount
+        - $incomeAmount_expect_2
+    -   eq:
+        - body[0].worthAmount
+        - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
+
+-   name: 资产评估--现金流--按年统计
+    setup_hooks:
+        - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
+        - Amount_out: ${sum_two($payedAmount_out, $carryInAmount_out)}
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body[0].costAmount
+        - $Amount_out
+    -   eq:
+        - body[0].incomeAmount
+        - $incomeAmount_expect
+    -   eq:
+        - body[0].worthAmount
+        - ${reduce_two($incomeAmount_expect, $Amount_out)}
+
+-   name: 数据舱--现金流详情--按月查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: '2021-09-30'
+            startDate: '2021-09-01'
+            page: '0'
+            size: '20'
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].type
+        - "收款"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].carryAmount
+        - 200
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].type
+        - "收款"
+    -   eq:
+        - body.content[1].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[1].carryAmount
+        - 50
+    -   eq:
+        - body.content[2].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].type
+        - "付款"
+    -   eq:
+        - body.content[2].billType
+        - "租金"
+    -   eq:
+        - body.content[2].carryAmount
+        - 100
+    -   eq:
+        - body.content[3].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].type
+        - "付款"
+    -   eq:
+        - body.content[3].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[3].carryAmount
+        - 30
+
+-   name: 数据舱--现金流详情--按季度查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: '2021-09-30'
+            startDate: '2021-07-01'
+            page: '0'
+            size: '20'
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].type
+        - "收款"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].carryAmount
+        - 200
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].type
+        - "收款"
+    -   eq:
+        - body.content[1].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[1].carryAmount
+        - 50
+    -   eq:
+        - body.content[2].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].type
+        - "付款"
+    -   eq:
+        - body.content[2].billType
+        - "租金"
+    -   eq:
+        - body.content[2].carryAmount
+        - 100
+    -   eq:
+        - body.content[3].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].type
+        - "付款"
+    -   eq:
+        - body.content[3].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[3].carryAmount
+        - 30
+
+-   name: 数据舱--现金流详情--按年查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            startDate: '2021-01-01'
+            endDate: '2021-12-31'
+            page: '0'
+            size: '20'
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].type
+        - "收款"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 200
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].type
+        - "收款"
+    -   eq:
+        - body.content[1].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[1].carryAmount
+        - 50
+    -   eq:
+        - body.content[2].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].type
+        - "付款"
+    -   eq:
+        - body.content[2].billType
+        - "租金"
+    -   eq:
+        - body.content[2].carryAmount
+        - 100
+    -   eq:
+        - body.content[3].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].type
+        - "付款"
+    -   eq:
+        - body.content[3].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[3].carryAmount
+        - 30
+
+-   name: 删除楼宇
     request:
         headers:
             authorization: Bearer $access_token
             content-type: application/json; charset=utf-8
         method: DELETE
-        params:
-            closeCash: 'true'
-            ids: billId_in_1,billId_in_2,billId_in_3,billId_out_1,billId_out_2,billId_out_3
-            invalidDate: '2021-09-15'
-            reason: '关闭流水'
-        url: ${ENV(api_url)}/v2/bills/bill-with-cash
+        url: ${ENV(api_url)}/buildings/$building_id
     validate:
     -   eq:
         - status_code

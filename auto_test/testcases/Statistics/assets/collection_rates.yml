@@ -8,8 +8,8 @@ config:
     export:
         - building_id
 teststeps:
--   name: 获取楼宇id
-    testcase: testcases/Buildings/buildings.yml
+-   name: 添加账单收入、支出数据
+    testcase: testcases/Account/create_bills.yml
 
 -   name: 收缴率--按月查询
     request:
@@ -23,7 +23,7 @@ teststeps:
             startDate: $startDate
             switchValue: percentage
             temporalUnit: MONTH
-            billTypes: '租金,物业费'
+            billTypes: 租金
         url: ${ENV(api_url)}/assets/collection-rates
     validate:
     -   eq:

@@ -10,13 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from httprunner import HttpRunner, Config, Step, RunRequest, RunTestCase
 
-from testcases.Account.create_bills_in_test import (
-    TestCaseCreateBillsIn as CreateBillsIn,
-)
-
-from testcases.Account.create_bills_out_test import (
-    TestCaseCreateBillsOut as CreateBillsOut,
-)
+from testcases.Account.create_bills_test import TestCaseCreateBills as CreateBills
 
 
 class TestCaseCashflows(HttpRunner):
@@ -26,8 +20,8 @@ class TestCaseCashflows(HttpRunner):
         .variables(
             **{
                 "access_token": "${get_token()}",
-                "month_endDate": "2021-12-31",
-                "month_startDate": "2021-01-01",
+                "endDate": "2021-12-31",
+                "startDate": "2021-01-01",
             }
         )
         .export(
@@ -39,64 +33,35 @@ class TestCaseCashflows(HttpRunner):
                 "carryInAmount_in_1",
                 "payedAmount_in_2",
                 "carryInAmount_in_2",
-                "payedAmount_in_3",
-                "carryInAmount_in_3",
                 "payedAmount_out",
                 "carryInAmount_out",
                 "payedAmount_out_1",
                 "carryInAmount_out_1",
                 "payedAmount_out_2",
                 "carryInAmount_out_2",
-                "payedAmount_out_3",
-                "carryInAmount_out_3",
-                "billId_in_1",
-                "billId_in_2",
-                "billId_in_3",
-                "billId_out_1",
-                "billId_out_2",
-                "billId_out_3",
             ]
         )
     )
 
     teststeps = [
         Step(
-            RunTestCase("添加账单收入数据")
-            .call(CreateBillsIn)
-            .export(
-                *[
-                    "billId_in_3",
-                    "payedAmount_in_2",
-                    "carryInAmount_in_1",
-                    "payedAmount_in_1",
-                    "billId_in_1",
-                    "building_id",
-                    "payedAmount_in",
-                    "billId_in_2",
-                    "carryInAmount_in",
-                    "payedAmount_in_3",
-                    "carryInAmount_in_3",
-                    "carryInAmount_in_2",
-                ]
-            )
-        ),
-        Step(
-            RunTestCase("添加账单支出数据")
-            .call(CreateBillsOut)
+            RunTestCase("添加账单收入、支出数据")
+            .call(CreateBills)
             .export(
                 *[
                     "carryInAmount_out_1",
-                    "carryInAmount_out_2",
-                    "carryInAmount_out",
-                    "payedAmount_out_3",
-                    "payedAmount_out",
-                    "payedAmount_out_2",
-                    "building_id",
-                    "billId_out_2",
-                    "carryInAmount_out_3",
-                    "billId_out_1",
-                    "billId_out_3",
                     "payedAmount_out_1",
+                    "carryInAmount_in",
+                    "building_id",
+                    "carryInAmount_in_2",
+                    "payedAmount_in",
+                    "payedAmount_out",
+                    "payedAmount_in_1",
+                    "payedAmount_out_2",
+                    "carryInAmount_in_1",
+                    "carryInAmount_out_2",
+                    "payedAmount_in_2",
+                    "carryInAmount_out",
                 ]
             )
         ),
@@ -114,8 +79,8 @@ class TestCaseCashflows(HttpRunner):
                 **{
                     "buildingIds": "$building_id",
                     "domainTypes": "CASH_MATCH",
-                    "endDate": "$month_endDate",
-                    "startDate": "$month_startDate",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
                     "temporalUnit": "MONTH",
                     "billTypes": "租金",
                 }
@@ -131,7 +96,7 @@ class TestCaseCashflows(HttpRunner):
             )
         ),
         Step(
-            RunRequest("资产评估--现金流--按租金保证金、月统计")
+            RunRequest("资产评估--现金流--按租金+租金保证金、月统计")
             .setup_hook(
                 "${sum_two($payedAmount_in_2, $carryInAmount_in_2)}",
                 "incomeAmount_expect_2",
@@ -144,10 +109,10 @@ class TestCaseCashflows(HttpRunner):
                 **{
                     "buildingIds": "$building_id",
                     "domainTypes": "CASH_MATCH",
-                    "endDate": "$month_endDate",
-                    "startDate": "$month_startDate",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
                     "temporalUnit": "MONTH",
-                    "billTypes": "租金保证金",
+                    "billTypes": "租金,租金保证金",
                 }
             )
             .with_headers(**{"authorization": "Bearer $access_token"})
@@ -158,36 +123,6 @@ class TestCaseCashflows(HttpRunner):
             .assert_equal(
                 "body[8].worthAmount",
                 "${reduce_two($incomeAmount_expect_2, $Amount_out_2)}",
-            )
-        ),
-        Step(
-            RunRequest("资产评估--现金流--按物业费、月统计")
-            .setup_hook(
-                "${sum_two($payedAmount_in_3, $carryInAmount_in_3)}",
-                "incomeAmount_expect_3",
-            )
-            .setup_hook(
-                "${sum_two($payedAmount_out_3, $carryInAmount_out_3)}", "Amount_out_3"
-            )
-            .get("${ENV(api_url)}/assets/cashflows")
-            .with_params(
-                **{
-                    "buildingIds": "$building_id",
-                    "domainTypes": "CASH_MATCH",
-                    "endDate": "$month_endDate",
-                    "startDate": "$month_startDate",
-                    "temporalUnit": "MONTH",
-                    "billTypes": "物业费",
-                }
-            )
-            .with_headers(**{"authorization": "Bearer $access_token"})
-            .validate()
-            .assert_equal("status_code", 200)
-            .assert_equal("body[8].costAmount", "$Amount_out_3")
-            .assert_equal("body[8].incomeAmount", "$incomeAmount_expect_3")
-            .assert_equal(
-                "body[8].worthAmount",
-                "${reduce_two($incomeAmount_expect_3, $Amount_out_3)}",
             )
         ),
         Step(
@@ -203,8 +138,8 @@ class TestCaseCashflows(HttpRunner):
                 **{
                     "buildingIds": "$building_id",
                     "domainTypes": "CASH_MATCH",
-                    "endDate": "$month_endDate",
-                    "startDate": "$month_startDate",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
                     "temporalUnit": "MONTH",
                 }
             )
@@ -219,16 +154,262 @@ class TestCaseCashflows(HttpRunner):
             )
         ),
         Step(
-            RunRequest("批量解除收入流水")
-            .delete("${ENV(api_url)}/v2/bills/bill-with-cash")
+            RunRequest("资产评估--现金流--按租金、季度统计")
+            .setup_hook(
+                "${sum_two($payedAmount_in_1, $carryInAmount_in_1)}",
+                "incomeAmount_expect_1",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_1, $carryInAmount_out_1)}", "Amount_out_1"
+            )
+            .get("${ENV(api_url)}/assets/cashflows")
             .with_params(
                 **{
-                    "closeCash": "true",
-                    "ids": "801037,801036,801035,801034,801033,801032",
-                    "invalidDate": "2021-09-15",
-                    "reason": "关闭流水",
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "QUARTER",
+                    "billTypes": "租金",
                 }
             )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", "$Amount_out_1")
+            .assert_equal("body[2].incomeAmount", "$incomeAmount_expect_1")
+            .assert_equal(
+                "body[2].worthAmount",
+                "${reduce_two($incomeAmount_expect_1, $Amount_out_1)}",
+            )
+        ),
+        Step(
+            RunRequest("资产评估--现金流--按租金+租金保证金、季度统计")
+            .setup_hook(
+                "${sum_two($payedAmount_in_2, $carryInAmount_in_2)}",
+                "incomeAmount_expect_2",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_2, $carryInAmount_out_2)}", "Amount_out_2"
+            )
+            .get("${ENV(api_url)}/assets/cashflows")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "QUARTER",
+                    "billTypes": "租金,租金保证金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", "$Amount_out_2")
+            .assert_equal("body[2].incomeAmount", "$incomeAmount_expect_2")
+            .assert_equal(
+                "body[2].worthAmount",
+                "${reduce_two($incomeAmount_expect_2, $Amount_out_2)}",
+            )
+        ),
+        Step(
+            RunRequest("资产评估--现金流--按季度统计")
+            .setup_hook(
+                "${sum_two($payedAmount_in, $carryInAmount_in)}", "incomeAmount_expect"
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out, $carryInAmount_out)}", "Amount_out"
+            )
+            .get("${ENV(api_url)}/assets/cashflows")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "QUARTER",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", "$Amount_out")
+            .assert_equal("body[2].incomeAmount", "$incomeAmount_expect")
+            .assert_equal(
+                "body[2].worthAmount",
+                "${reduce_two($incomeAmount_expect, $Amount_out)}",
+            )
+        ),
+        Step(
+            RunRequest("资产评估--现金流--按租金、年统计")
+            .setup_hook(
+                "${sum_two($payedAmount_in_1, $carryInAmount_in_1)}",
+                "incomeAmount_expect_1",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_1, $carryInAmount_out_1)}", "Amount_out_1"
+            )
+            .get("${ENV(api_url)}/assets/cashflows")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "YEAR",
+                    "billTypes": "租金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", "$Amount_out_1")
+            .assert_equal("body[0].incomeAmount", "$incomeAmount_expect_1")
+            .assert_equal(
+                "body[0].worthAmount",
+                "${reduce_two($incomeAmount_expect_1, $Amount_out_1)}",
+            )
+        ),
+        Step(
+            RunRequest("资产评估--现金流--按租金+租金保证金、年统计")
+            .setup_hook(
+                "${sum_two($payedAmount_in_2, $carryInAmount_in_2)}",
+                "incomeAmount_expect_2",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_2, $carryInAmount_out_2)}", "Amount_out_2"
+            )
+            .get("${ENV(api_url)}/assets/cashflows")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "YEAR",
+                    "billTypes": "租金,租金保证金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", "$Amount_out_2")
+            .assert_equal("body[0].incomeAmount", "$incomeAmount_expect_2")
+            .assert_equal(
+                "body[0].worthAmount",
+                "${reduce_two($incomeAmount_expect_2, $Amount_out_2)}",
+            )
+        ),
+        Step(
+            RunRequest("资产评估--现金流--按年统计")
+            .setup_hook(
+                "${sum_two($payedAmount_in, $carryInAmount_in)}", "incomeAmount_expect"
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out, $carryInAmount_out)}", "Amount_out"
+            )
+            .get("${ENV(api_url)}/assets/cashflows")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "YEAR",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", "$Amount_out")
+            .assert_equal("body[0].incomeAmount", "$incomeAmount_expect")
+            .assert_equal(
+                "body[0].worthAmount",
+                "${reduce_two($incomeAmount_expect, $Amount_out)}",
+            )
+        ),
+        Step(
+            RunRequest("数据舱--现金流详情--按月查看")
+            .get("${ENV(api_url)}/assets/cashflows/detail")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "endDate": "2021-09-30",
+                    "startDate": "2021-09-01",
+                    "page": "0",
+                    "size": "20",
+                    "temporalUnit": "MONTH",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body.content[0].tenantName", "湖南神雀网络科技有限公司")
+            .assert_equal("body.content[0].type", "收款")
+            .assert_equal("body.content[0].billType", "租金")
+            .assert_equal("body.content[0].amount", 200)
+            .assert_equal("body.content[1].tenantName", "湖南神雀网络科技有限公司")
+            .assert_equal("body.content[1].type", "收款")
+            .assert_equal("body.content[1].billType", "租金保证金")
+            .assert_equal("body.content[1].amount", 50)
+        ),
+        Step(
+            RunRequest("数据舱--现金流详情--按季度查看")
+            .get("${ENV(api_url)}/assets/cashflows/detail")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "endDate": "2021-09-30",
+                    "startDate": "2021-07-01",
+                    "page": "0",
+                    "size": "20",
+                    "temporalUnit": "QUARTER",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body.content[0].tenantName", "湖南神雀网络科技有限公司")
+            .assert_equal("body.content[0].type", "收款")
+            .assert_equal("body.content[0].billType", "租金")
+            .assert_equal("body.content[0].amount", 200)
+            .assert_equal("body.content[1].tenantName", "湖南神雀网络科技有限公司")
+            .assert_equal("body.content[1].type", "收款")
+            .assert_equal("body.content[1].billType", "租金保证金")
+            .assert_equal("body.content[1].amount", 50)
+        ),
+        Step(
+            RunRequest("数据舱--现金流详情--按年查看")
+            .get("${ENV(api_url)}/assets/cashflows/detail")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "domainTypes": "CASH_MATCH",
+                    "startDate": "2021-01-01",
+                    "endDate": "2021-12-31",
+                    "page": "0",
+                    "size": "20",
+                    "temporalUnit": "YEAR",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body.content[0].tenantName", "湖南神雀网络科技有限公司")
+            .assert_equal("body.content[0].type", "收款")
+            .assert_equal("body.content[0].billType", "租金")
+            .assert_equal("body.content[0].amount", 200)
+            .assert_equal("body.content[1].tenantName", "湖南神雀网络科技有限公司")
+            .assert_equal("body.content[1].type", "收款")
+            .assert_equal("body.content[1].billType", "租金保证金")
+            .assert_equal("body.content[1].amount", 50)
+        ),
+        Step(
+            RunRequest("删除楼宇")
+            .delete("${ENV(api_url)}/buildings/$building_id")
             .with_headers(
                 **{
                     "authorization": "Bearer $access_token",

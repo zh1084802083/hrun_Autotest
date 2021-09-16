@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from httprunner import HttpRunner, Config, Step, RunRequest, RunTestCase
 
-from testcases.Buildings.buildings_test import TestCaseBuildings as Buildings
+from testcases.Account.create_bills_test import TestCaseCreateBills as CreateBills
 
 
 class TestCaseCashflowPredictions(HttpRunner):
@@ -25,13 +25,56 @@ class TestCaseCashflowPredictions(HttpRunner):
             }
         )
         .verify(False)
-        .export(*["building_id"])
+        .export(
+            *[
+                "building_id",
+                "payedAmount_in",
+                "carryInAmount_in",
+                "payedAmount_in_1",
+                "carryInAmount_in_1",
+                "payedAmount_in_2",
+                "carryInAmount_in_2",
+                "payedAmount_out",
+                "carryInAmount_out",
+                "payedAmount_out_1",
+                "carryInAmount_out_1",
+                "payedAmount_out_2",
+                "carryInAmount_out_2",
+            ]
+        )
     )
 
     teststeps = [
-        Step(RunTestCase("获取楼宇id").call(Buildings).export(*["building_id"])),
         Step(
-            RunRequest("现金流预测--按月查询")
+            RunTestCase("添加账单收入、支出数据")
+            .call(CreateBills)
+            .export(
+                *[
+                    "payedAmount_out_2",
+                    "building_id",
+                    "payedAmount_out",
+                    "carryInAmount_in",
+                    "payedAmount_out_1",
+                    "carryInAmount_out_2",
+                    "payedAmount_in_2",
+                    "carryInAmount_in_2",
+                    "payedAmount_in_1",
+                    "carryInAmount_out",
+                    "carryInAmount_out_1",
+                    "payedAmount_in",
+                    "carryInAmount_in_1",
+                ]
+            )
+        ),
+        Step(
+            RunRequest("现金流预测--租金、按月查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in_1, $carryInAmount_in_1)}",
+                "incomeAmount_expect_1",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_1, $carryInAmount_out_1)}", "Amount_out_1"
+            )
             .get("${ENV(api_url)}/assets/cashflow-predictions")
             .with_params(
                 **{
@@ -40,15 +83,116 @@ class TestCaseCashflowPredictions(HttpRunner):
                     "endDate": "$endDate",
                     "startDate": "$startDate",
                     "temporalUnit": "MONTH",
-                    "billTypes": "租金,物业费",
+                    "billTypes": "租金",
                 }
             )
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body[8].costAmount", "$Amount_out_1")
+            .assert_equal("body[8].incomeAmount", "$incomeAmount_expect_1")
+            .assert_equal(
+                "body[8].worthAmount",
+                "${reduce_two($incomeAmount_expect_1, $Amount_out_1)}",
+            )
         ),
         Step(
-            RunRequest("现金流预测--按季查询")
+            RunRequest("现金流预测--租金+租金保证金、按月查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in_2, $carryInAmount_in_2)}",
+                "incomeAmount_expect_2",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_2, $carryInAmount_out_2)}", "Amount_out_2"
+            )
+            .get("${ENV(api_url)}/assets/cashflow-predictions")
+            .with_params(
+                **{
+                    "billSelectAmount": "AMOUNT",
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "MONTH",
+                    "billTypes": "租金,租金保证金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[8].costAmount", "$Amount_out_2")
+            .assert_equal("body[8].incomeAmount", "$incomeAmount_expect_2")
+            .assert_equal(
+                "body[8].worthAmount",
+                "${reduce_two($incomeAmount_expect_2, $Amount_out_2)}",
+            )
+        ),
+        Step(
+            RunRequest("现金流预测--租金、按月查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in_1, $carryInAmount_in_1)}",
+                "incomeAmount_expect_1",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_1, $carryInAmount_out_1)}", "Amount_out_1"
+            )
+            .get("${ENV(api_url)}/assets/cashflow-predictions")
+            .with_params(
+                **{
+                    "billSelectAmount": "AMOUNT",
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "MONTH",
+                    "billTypes": "租金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[8].costAmount", "$Amount_out_1")
+            .assert_equal("body[8].incomeAmount", "$incomeAmount_expect_1")
+            .assert_equal(
+                "body[8].worthAmount",
+                "${reduce_two($incomeAmount_expect_1, $Amount_out_1)}",
+            )
+        ),
+        Step(
+            RunRequest("现金流预测--按月查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in, $carryInAmount_in)}", "incomeAmount_expect"
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out, $carryInAmount_out)}", "Amount_out"
+            )
+            .get("${ENV(api_url)}/assets/cashflow-predictions")
+            .with_params(
+                **{
+                    "billSelectAmount": "AMOUNT",
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "MONTH",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[8].costAmount", "$Amount_out")
+            .assert_equal("body[8].incomeAmount", "$incomeAmount_expect")
+            .assert_equal(
+                "body[8].worthAmount",
+                "${reduce_two($incomeAmount_expect, $Amount_out)}",
+            )
+        ),
+        Step(
+            RunRequest("现金流预测--租金、按季查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in_1, $carryInAmount_in_1)}",
+                "incomeAmount_expect_1",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_1, $carryInAmount_out_1)}", "Amount_out_1"
+            )
             .get("${ENV(api_url)}/assets/cashflow-predictions")
             .with_params(
                 **{
@@ -57,15 +201,86 @@ class TestCaseCashflowPredictions(HttpRunner):
                     "endDate": "$endDate",
                     "startDate": "$startDate",
                     "temporalUnit": "QUARTER",
-                    "billTypes": "租金,物业费",
+                    "billTypes": "租金",
                 }
             )
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", "$Amount_out_1")
+            .assert_equal("body[2].incomeAmount", "$incomeAmount_expect_1")
+            .assert_equal(
+                "body[2].worthAmount",
+                "${reduce_two($incomeAmount_expect_1, $Amount_out_1)}",
+            )
         ),
         Step(
-            RunRequest("现金流预测--按年查询")
+            RunRequest("现金流预测--租金+租金保证金、按季查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in_2, $carryInAmount_in_2)}",
+                "incomeAmount_expect_2",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_2, $carryInAmount_out_2)}", "Amount_out_2"
+            )
+            .get("${ENV(api_url)}/assets/cashflow-predictions")
+            .with_params(
+                **{
+                    "billSelectAmount": "AMOUNT",
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "QUARTER",
+                    "billTypes": "租金,租金保证金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", "$Amount_out_2")
+            .assert_equal("body[2].incomeAmount", "$incomeAmount_expect_2")
+            .assert_equal(
+                "body[2].worthAmount",
+                "${reduce_two($incomeAmount_expect_2, $Amount_out_2)}",
+            )
+        ),
+        Step(
+            RunRequest("现金流预测--按季查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in, $carryInAmount_in)}", "incomeAmount_expect"
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out, $carryInAmount_out)}", "Amount_out"
+            )
+            .get("${ENV(api_url)}/assets/cashflow-predictions")
+            .with_params(
+                **{
+                    "billSelectAmount": "AMOUNT",
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "QUARTER",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", "$Amount_out")
+            .assert_equal("body[2].incomeAmount", "$incomeAmount_expect")
+            .assert_equal(
+                "body[2].worthAmount",
+                "${reduce_two($incomeAmount_expect, $Amount_out)}",
+            )
+        ),
+        Step(
+            RunRequest("现金流预测--租金、按年查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in_1, $carryInAmount_in_1)}",
+                "incomeAmount_expect_1",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_1, $carryInAmount_out_1)}", "Amount_out_1"
+            )
             .get("${ENV(api_url)}/assets/cashflow-predictions")
             .with_params(
                 **{
@@ -74,12 +289,89 @@ class TestCaseCashflowPredictions(HttpRunner):
                     "endDate": "$endDate",
                     "startDate": "$startDate",
                     "temporalUnit": "YEAR",
-                    "billTypes": "租金,物业费",
+                    "billTypes": "租金",
                 }
             )
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", "$Amount_out_1")
+            .assert_equal("body[0].incomeAmount", "$incomeAmount_expect_1")
+            .assert_equal(
+                "body[0].worthAmount",
+                "${reduce_two($incomeAmount_expect_1, $Amount_out_1)}",
+            )
+        ),
+        Step(
+            RunRequest("现金流预测--租金+租金保证金、按年查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in_2, $carryInAmount_in_2)}",
+                "incomeAmount_expect_2",
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out_2, $carryInAmount_out_2)}", "Amount_out_2"
+            )
+            .get("${ENV(api_url)}/assets/cashflow-predictions")
+            .with_params(
+                **{
+                    "billSelectAmount": "AMOUNT",
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "YEAR",
+                    "billTypes": "租金,租金保证金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", "$Amount_out_2")
+            .assert_equal("body[0].incomeAmount", "$incomeAmount_expect_2")
+            .assert_equal(
+                "body[0].worthAmount",
+                "${reduce_two($incomeAmount_expect_2, $Amount_out_2)}",
+            )
+        ),
+        Step(
+            RunRequest("现金流预测--按年查询")
+            .setup_hook(
+                "${sum_two($payedAmount_in, $carryInAmount_in)}", "incomeAmount_expect"
+            )
+            .setup_hook(
+                "${sum_two($payedAmount_out, $carryInAmount_out)}", "Amount_out"
+            )
+            .get("${ENV(api_url)}/assets/cashflow-predictions")
+            .with_params(
+                **{
+                    "billSelectAmount": "AMOUNT",
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "YEAR",
+                    "billTypes": "租金,租金保证金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", "$Amount_out")
+            .assert_equal("body[0].incomeAmount", "$incomeAmount_expect")
+            .assert_equal(
+                "body[0].worthAmount",
+                "${reduce_two($incomeAmount_expect, $Amount_out)}",
+            )
+        ),
+        Step(
+            RunRequest("删除楼宇")
+            .delete("${ENV(api_url)}/buildings/$building_id")
+            .with_headers(
+                **{
+                    "authorization": "Bearer $access_token",
+                    "content-type": "application/json; charset=utf-8",
+                }
+            )
+            .validate()
+            .assert_equal("status_code", 204)
         ),
     ]
 
