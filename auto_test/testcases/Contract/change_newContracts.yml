@@ -180,7 +180,7 @@ teststeps:
     setup_hooks:
         - ${set_contract_sh()}
     teardown_hooks:
-        - ${wait($response,0.5)}
+        - ${wait(0.5)}
     validate:
     -   eq:
         - status_code

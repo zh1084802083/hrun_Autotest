@@ -55,7 +55,7 @@ teststeps:
         - status_code
         - 200
     teardown_hooks:
-        - ${wait($response, 1)}
+        - ${wait(1)}
 
 -   name: 新增工位后，获取工位列表
     request:

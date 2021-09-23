@@ -180,7 +180,7 @@ teststeps:
     setup_hooks:
         - ${set_contract_sh()}
     teardown_hooks:
-        - ${wait($response,0.5)}
+        - ${wait(0.5)}
     validate:
     -   eq:
         - status_code
@@ -255,7 +255,7 @@ teststeps:
         method: POST
         url: ${ENV(api_url)}/oa/start
     teardown_hooks:
-        - ${wait($response,1)}
+        - ${wait(1)}
     validate:
     -   eq:
         - status_code

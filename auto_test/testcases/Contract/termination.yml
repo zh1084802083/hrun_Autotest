@@ -182,7 +182,7 @@ teststeps:
         - status_code
         - 200
     teardown_hooks:
-        - ${wait($response,1)}
+        - ${wait(1)}
 
 -   name: 计算退租协议所需金额
     request:
@@ -260,7 +260,7 @@ teststeps:
     setup_hooks:
         - ${set_contract_sh()}
     teardown_hooks:
-        - ${wait($response,1)}
+        - ${wait(1)}
 
 -   name: 查看合同状态是否为已退租
     request:

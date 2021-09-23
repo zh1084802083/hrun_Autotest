@@ -97,7 +97,7 @@ teststeps:
         - status_code
         - 200
     teardown_hooks:
-        - ${wait($response,1)}
+        - ${wait(1)}
 
 -   name: 续租已退租合同
     request:
@@ -183,7 +183,7 @@ teststeps:
         - status_code
         - 201
     teardown_hooks:
-        - ${wait($response,1)}
+        - ${wait(1)}
 
 
 -   name: 提交续租已退租合同
@@ -207,7 +207,7 @@ teststeps:
         - status_code
         - 200
     teardown_hooks:
-        - ${wait($response,1)}
+        - ${wait(1)}
 
 -   name: 作废已续租合同
     request:
@@ -227,7 +227,7 @@ teststeps:
         - status_code
         - 201
     teardown_hooks:
-        - ${wait($response,0.5)}
+        - ${wait(0.5)}
 
 -   name: 生效作废合同
     request:
