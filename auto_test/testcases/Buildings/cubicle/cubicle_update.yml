@@ -1,0 +1,181 @@
+config:
+    name: 编辑工位
+    variables:
+        access_token: ${get_token()}
+        areaSize: ${str_to_int(20)}
+        room_number: ${random_int(201,299)}
+    verify: false
+    export:
+        - room_id
+        - building_id
+        - cubicleId
+teststeps:
+-   name: 获取楼宇id
+    testcase: testcases/Buildings/buildings.yml
+
+-   name: 新增可招商工位类型房源
+    request:
+        headers:
+            authorization: Bearer $access_token
+        json:
+            areaSize: $areaSize
+            buildingId: $building_id
+            cubicleUpdateRequests:
+            -   marketingAvailable: 'true'
+                number: '1'
+            floorName: '2'
+            jsonData: '[{"required":false,"fieldName":"建筑面积","fieldType":"NUMBER","systemField":true},{"required":false,"fieldName":"装修","fieldType":"SINGLE_SELECT","values":["不限","毛坯","简装","精装"],"systemField":true},{"required":false,"fieldName":"预租单价","fieldType":"NUMBER","systemField":true}]'
+            marketingAvailable: 'true'
+            realAreaSize: $areaSize
+            roomNumber: $room_number
+            spaceType: CUBICLE
+        method: POST
+        url: ${ENV(api_url)}/buildings/$building_id/rooms
+    extract:
+        - room_id: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 获取工位类型房源中的工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings/room/$room_id/cubicles
+    extract:
+        - cubicleId: content[0].id
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 查看工位详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings/cubicles/$cubicleId
+    extract:
+        - customFieldJsonData: body.customFieldJsonData
+        - jsonData: body.jsonData
+        - cubicle_number: body.number
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 修改工位编号
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: PUT
+        url: ${ENV(api_url)}/buildings/rooms/cubicles/$cubicleId
+        json:
+            customFieldJsonData: $customFieldJsonData
+            jsonData: $jsonData
+            marketingAvailable: true
+            number: '5'
+            price: null
+            tags: [ ]
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 修改工位编号后，查看工位详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings/cubicles/$cubicleId
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.marketingAvailable
+        - true
+    -   eq:
+        - body.number
+        - '5'
+
+-   name: 修改工位招商状态
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: PUT
+        url: ${ENV(api_url)}/buildings/rooms/cubicles/$cubicleId
+        json:
+            customFieldJsonData: $customFieldJsonData
+            jsonData: $jsonData
+            marketingAvailable: false
+            number: $cubicle_number
+            price: null
+            tags: [ ]
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 修改工位招商状态后，查看工位详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings/cubicles/$cubicleId
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.marketingAvailable
+        - false
+
+-   name: 修改工位招商状态、工位编号
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: PUT
+        url: ${ENV(api_url)}/buildings/rooms/cubicles/$cubicleId
+        json:
+            customFieldJsonData: $customFieldJsonData
+            jsonData: $jsonData
+            marketingAvailable: false
+            number: '5'
+            price: null
+            tags: [ ]
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 修改工位招商状态后，查看工位详情
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings/cubicles/$cubicleId
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.marketingAvailable
+        - false
+    -   eq:
+        - body.number
+        - '5'
+
+-   name: 删除工位
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        method: DELETE
+        url: ${ENV(api_url)}/buildings/cubicles/$cubicleId
+    validate:
+    -   eq:
+        - status_code
+        - 200
