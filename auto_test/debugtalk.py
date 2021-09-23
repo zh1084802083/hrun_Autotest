@@ -379,11 +379,8 @@ def sum_float(x, y):
     return float(x)+float(y)
 
 
-def wait(response, x):
-    if response.status_code == 200 | response.status_code == 201:
-        time.sleep(x)
-    else:
-        time.sleep(0.5)
+def wait(x):
+    time.sleep(x)
 
 
 def random_int(x, y):
@@ -411,7 +408,7 @@ def reduce_two(m, n):
 
 
 def division_two(m, n):
-    return m / n
+    return round((m / n), 4)
 
 
 def begin_date():

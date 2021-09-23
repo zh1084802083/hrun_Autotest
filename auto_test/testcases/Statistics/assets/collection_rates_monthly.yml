@@ -8,8 +8,106 @@ config:
     export:
         - building_id
 teststeps:
--   name: 获取楼宇id
-    testcase: testcases/Buildings/buildings.yml
+-   name: 添加账单收入、支出数据
+    testcase: testcases/Account/create_bills.yml
+
+-   name: 分摊收缴率--租金、按月查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: MONTH
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/collection-rates/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.7.amount
+        - 98.12
+    -   eq:
+        - body.7.cashFlowAmount
+        - 98.12
+    -   eq:
+        - body.7.currentCashFlowAmount
+        - 98.12
+    -   eq:
+        - body.8.amount
+        - 3241.67
+    -   eq:
+        - body.8.cashFlowAmount
+        - 100
+    -   eq:
+        - body.8.currentCashFlowAmount
+        - 100
+    -   eq:
+        - body.7.totalCollectionRate
+        - 1
+    -   eq:
+        - body.7.currentCollectionRate
+        - 1
+    -   eq:
+        - body.8.totalCollectionRate
+        - 0.0308
+    -   eq:
+        - body.8.currentCollectionRate
+        - 0.0308
+
+-   name: 分摊收缴率--租金+物业费、按月查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: MONTH
+            billTypes: 租金,物业费
+        url: ${ENV(api_url)}/assets/collection-rates/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.7.amount
+        - 98.12
+    -   eq:
+        - body.7.cashFlowAmount
+        - 98.12
+    -   eq:
+        - body.7.currentCashFlowAmount
+        - 98.12
+    -   eq:
+        - body.8.amount
+        - 3257.17
+    -   eq:
+        - body.8.cashFlowAmount
+        - 115.5
+    -   eq:
+        - body.8.currentCashFlowAmount
+        - 115.5
+    -   eq:
+        - body.7.totalCollectionRate
+        - 1
+    -   eq:
+        - body.7.currentCollectionRate
+        - 1
+    -   eq:
+        - body.8.totalCollectionRate
+        - 0.0355
+    -   eq:
+        - body.8.currentCollectionRate
+        - 0.0355
 
 -   name: 分摊收缴率--按月查询
     request:
@@ -23,12 +121,109 @@ teststeps:
             startDate: $startDate
             switchValue: percentage
             temporalUnit: MONTH
-            billTypes: '租金,物业费'
         url: ${ENV(api_url)}/assets/collection-rates/monthly
     validate:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.7.amount
+        - 98.12
+    -   eq:
+        - body.7.cashFlowAmount
+        - 98.12
+    -   eq:
+        - body.7.currentCashFlowAmount
+        - 98.12
+    -   eq:
+        - body.8.amount
+        - 3257.17
+    -   eq:
+        - body.8.cashFlowAmount
+        - 115.5
+    -   eq:
+        - body.8.currentCashFlowAmount
+        - 115.5
+    -   eq:
+        - body.7.totalCollectionRate
+        - 1
+    -   eq:
+        - body.7.currentCollectionRate
+        - 1
+    -   eq:
+        - body.8.totalCollectionRate
+        - 0.0355
+    -   eq:
+        - body.8.currentCollectionRate
+        - 0.0355
+
+-   name: 分摊收缴率--租金、按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: QUARTER
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/collection-rates/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.amount
+        - 3339.79
+    -   eq:
+        - body.2.cashFlowAmount
+        - 198.12
+    -   eq:
+        - body.2.currentCashFlowAmount
+        - 198.12
+    -   eq:
+        - body.2.totalCollectionRate
+        - 0.0593
+    -   eq:
+        - body.2.currentCollectionRate
+        - 0.0593
+
+-   name: 分摊收缴率--租金+物业费、按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: QUARTER
+            billTypes: 租金,物业费
+        url: ${ENV(api_url)}/assets/collection-rates/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.amount
+        - 3355.29
+    -   eq:
+        - body.2.cashFlowAmount
+        - 213.62
+    -   eq:
+        - body.2.currentCashFlowAmount
+        - 213.62
+    -   eq:
+        - body.2.totalCollectionRate
+        - 0.0637
+    -   eq:
+        - body.2.currentCollectionRate
+        - 0.0637
 
 -   name: 分摊收缴率--按季查询
     request:
@@ -42,12 +237,94 @@ teststeps:
             startDate: $startDate
             switchValue: percentage
             temporalUnit: QUARTER
-            billTypes: '租金,物业费'
         url: ${ENV(api_url)}/assets/collection-rates/monthly
     validate:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.2.amount
+        - 3355.29
+    -   eq:
+        - body.2.cashFlowAmount
+        - 213.62
+    -   eq:
+        - body.2.currentCashFlowAmount
+        - 213.62
+    -   eq:
+        - body.2.totalCollectionRate
+        - 0.0637
+    -   eq:
+        - body.2.currentCollectionRate
+        - 0.0637
+
+-   name: 分摊收缴率--租金、按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: YEAR
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/collection-rates/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.amount
+        - 3339.79
+    -   eq:
+        - body.0.cashFlowAmount
+        - 198.12
+    -   eq:
+        - body.0.currentCashFlowAmount
+        - 198.12
+    -   eq:
+        - body.0.totalCollectionRate
+        - 0.0593
+    -   eq:
+        - body.0.currentCollectionRate
+        - 0.0593
+
+-   name: 分摊收缴率--租金+物业费、按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            switchValue: percentage
+            temporalUnit: YEAR
+            billTypes: 租金,物业费
+        url: ${ENV(api_url)}/assets/collection-rates/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.amount
+        - 3355.29
+    -   eq:
+        - body.0.cashFlowAmount
+        - 213.62
+    -   eq:
+        - body.0.currentCashFlowAmount
+        - 213.62
+    -   eq:
+        - body.0.totalCollectionRate
+        - 0.0637
+    -   eq:
+        - body.0.currentCollectionRate
+        - 0.0637
 
 -   name: 分摊收缴率--按年查询
     request:
@@ -61,9 +338,35 @@ teststeps:
             startDate: $startDate
             switchValue: percentage
             temporalUnit: YEAR
-            billTypes: '租金,物业费'
         url: ${ENV(api_url)}/assets/collection-rates/monthly
     validate:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.0.amount
+        - 3355.29
+    -   eq:
+        - body.0.cashFlowAmount
+        - 213.62
+    -   eq:
+        - body.0.currentCashFlowAmount
+        - 213.62
+    -   eq:
+        - body.0.totalCollectionRate
+        - 0.0637
+    -   eq:
+        - body.0.currentCollectionRate
+        - 0.0637
+
+-   name: 删除楼宇
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        method: DELETE
+        url: ${ENV(api_url)}/buildings/$building_id
+    validate:
+    -   eq:
+        - status_code
+        - 204

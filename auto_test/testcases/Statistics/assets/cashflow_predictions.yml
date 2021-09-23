@@ -7,26 +7,11 @@ config:
     verify: false
     export:
         - building_id
-        - payedAmount_in
-        - carryInAmount_in
-        - payedAmount_in_1
-        - carryInAmount_in_1
-        - payedAmount_in_2
-        - carryInAmount_in_2
-        - payedAmount_out
-        - carryInAmount_out
-        - payedAmount_out_1
-        - carryInAmount_out_1
-        - payedAmount_out_2
-        - carryInAmount_out_2
 teststeps:
 -   name: 添加账单收入、支出数据
     testcase: testcases/Account/create_bills.yml
 
 -   name: 现金流预测--租金、按月查询
-    setup_hooks:
-        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
-        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -44,19 +29,25 @@ teststeps:
         - status_code
         - 200
     -   eq:
+        - body[7].costAmount
+        - 0
+    -   eq:
+        - body[7].incomeAmount
+        - 98.12
+    -   eq:
+        - body[7].worthAmount
+        - 98.12
+    -   eq:
         - body[8].costAmount
-        - $Amount_out_1
+        - 100
     -   eq:
         - body[8].incomeAmount
-        - $incomeAmount_expect_1
+        - 3241.67
     -   eq:
         - body[8].worthAmount
-        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+        - 3141.67
 
 -   name: 现金流预测--租金+租金保证金、按月查询
-    setup_hooks:
-        - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
-        - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -74,49 +65,25 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[8].costAmount
-        - $Amount_out_2
+        - body[7].costAmount
+        - 0
     -   eq:
-        - body[8].incomeAmount
-        - $incomeAmount_expect_2
+        - body[7].incomeAmount
+        - 98.12
     -   eq:
-        - body[8].worthAmount
-        - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
-
--   name: 现金流预测--租金、按月查询
-    setup_hooks:
-        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
-        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
-    request:
-        headers:
-            authorization: Bearer $access_token
-        method: GET
-        params:
-            billSelectAmount: AMOUNT
-            buildingIds: $building_id
-            endDate: $endDate
-            startDate: $startDate
-            temporalUnit: MONTH
-            billTypes: 租金
-        url: ${ENV(api_url)}/assets/cashflow-predictions
-    validate:
-    -   eq:
-        - status_code
-        - 200
+        - body[7].worthAmount
+        - 98.12
     -   eq:
         - body[8].costAmount
-        - $Amount_out_1
+        - 130
     -   eq:
         - body[8].incomeAmount
-        - $incomeAmount_expect_1
+        - 6333.34
     -   eq:
         - body[8].worthAmount
-        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+        - 6203.34
 
 -   name: 现金流预测--按月查询
-    setup_hooks:
-        - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
-        - Amount_out: ${sum_two($payedAmount_out, $carryInAmount_out)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -133,19 +100,25 @@ teststeps:
         - status_code
         - 200
     -   eq:
+        - body[7].costAmount
+        - 0
+    -   eq:
+        - body[7].incomeAmount
+        - 98.12
+    -   eq:
+        - body[7].worthAmount
+        - 98.12
+    -   eq:
         - body[8].costAmount
-        - $Amount_out
+        - 165.5
     -   eq:
         - body[8].incomeAmount
-        - $incomeAmount_expect
+        - 6348.84
     -   eq:
         - body[8].worthAmount
-        - ${reduce_two($incomeAmount_expect, $Amount_out)}
+        - 6183.34
 
 -   name: 现金流预测--租金、按季查询
-    setup_hooks:
-        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
-        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -164,18 +137,15 @@ teststeps:
         - 200
     -   eq:
         - body[2].costAmount
-        - $Amount_out_1
+        - 100
     -   eq:
         - body[2].incomeAmount
-        - $incomeAmount_expect_1
+        - 3339.79
     -   eq:
         - body[2].worthAmount
-        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+        - 3239.79
 
 -   name: 现金流预测--租金+租金保证金、按季查询
-    setup_hooks:
-        - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
-        - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -194,18 +164,15 @@ teststeps:
         - 200
     -   eq:
         - body[2].costAmount
-        - $Amount_out_2
+        - 130
     -   eq:
         - body[2].incomeAmount
-        - $incomeAmount_expect_2
+        - 6431.46
     -   eq:
         - body[2].worthAmount
-        - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
+        - 6301.46
 
 -   name: 现金流预测--按季查询
-    setup_hooks:
-        - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
-        - Amount_out: ${sum_two($payedAmount_out, $carryInAmount_out)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -223,18 +190,15 @@ teststeps:
         - 200
     -   eq:
         - body[2].costAmount
-        - $Amount_out
+        - 165.5
     -   eq:
         - body[2].incomeAmount
-        - $incomeAmount_expect
+        - 6446.96
     -   eq:
         - body[2].worthAmount
-        - ${reduce_two($incomeAmount_expect, $Amount_out)}
+        - 6281.46
 
 -   name: 现金流预测--租金、按年查询
-    setup_hooks:
-        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
-        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -253,18 +217,15 @@ teststeps:
         - 200
     -   eq:
         - body[0].costAmount
-        - $Amount_out_1
+        - 100
     -   eq:
         - body[0].incomeAmount
-        - $incomeAmount_expect_1
+        - 3339.79
     -   eq:
         - body[0].worthAmount
-        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+        - 3239.79
 
 -   name: 现金流预测--租金+租金保证金、按年查询
-    setup_hooks:
-        - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
-        - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -283,18 +244,15 @@ teststeps:
         - 200
     -   eq:
         - body[0].costAmount
-        - $Amount_out_2
+        - 130
     -   eq:
         - body[0].incomeAmount
-        - $incomeAmount_expect_2
+        - 6431.46
     -   eq:
         - body[0].worthAmount
-        - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
+        - 6301.46
 
 -   name: 现金流预测--按年查询
-    setup_hooks:
-        - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
-        - Amount_out: ${sum_two($payedAmount_out, $carryInAmount_out)}
     request:
         headers:
             authorization: Bearer $access_token
@@ -305,7 +263,6 @@ teststeps:
             endDate: $endDate
             startDate: $startDate
             temporalUnit: YEAR
-            billTypes: 租金,租金保证金
         url: ${ENV(api_url)}/assets/cashflow-predictions
     validate:
     -   eq:
@@ -313,15 +270,282 @@ teststeps:
         - 200
     -   eq:
         - body[0].costAmount
-        - $Amount_out
+        - 165.5
     -   eq:
         - body[0].incomeAmount
-        - $incomeAmount_expect
+        - 6446.96
     -   eq:
         - body[0].worthAmount
-        - ${reduce_two($incomeAmount_expect, $Amount_out)}
+        - 6281.46
 
--   name: 现金流预测详情--按月查询
+-   name: 现金流预测详情--租金、按月查询-8
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-08-31'
+            startDate: '2021-08-01'
+            page: '0'
+            size: '100'
+            temporalUnit: MONTH
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+
+-   name: 现金流预测详情--租金+租金保证金、按月查询-8
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-08-31'
+            startDate: '2021-08-01'
+            page: '0'
+            size: '100'
+            temporalUnit: MONTH
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+    -   eq:
+        - body.content[1].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[1].amount
+        - 0
+
+-   name: 现金流预测详情--按月查询-8
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-08-31'
+            startDate: '2021-08-01'
+            page: '0'
+            size: '100'
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+    -   eq:
+        - body.content[1].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[1].amount
+        - 0
+
+-   name: 现金流预测详情--租金、按月查询-9
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-09-30'
+            startDate: '2021-09-01'
+            page: '0'
+            size: '100'
+            temporalUnit: MONTH
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 100
+    -   eq:
+        - body.content[1].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 200
+    -   eq:
+        - body.content[2].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金"
+    -   eq:
+        - body.content[2].amount
+        - 3041.67
+
+-   name: 现金流预测详情--租金+租金保证金、按月查询-9
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-09-30'
+            startDate: '2021-09-01'
+            page: '0'
+            size: '100'
+            temporalUnit: MONTH
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 30
+    -   eq:
+        - body.content[1].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "OUT"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+    -   eq:
+        - body.content[2].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[2].amount
+        - 50
+    -   eq:
+        - body.content[3].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "IN"
+    -   eq:
+        - body.content[3].billType
+        - "租金"
+    -   eq:
+        - body.content[3].amount
+        - 200
+    -   eq:
+        - body.content[4].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "IN"
+    -   eq:
+        - body.content[4].billType
+        - "租金"
+    -   eq:
+        - body.content[4].amount
+        - 3041.67
+    -   eq:
+        - body.content[5].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "IN"
+    -   eq:
+        - body.content[5].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[5].amount
+        - 3041.67
+
+-   name: 现金流预测详情--按月查询-9
     request:
         headers:
             authorization: Bearer $access_token
@@ -340,53 +564,285 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body.content[0].tenantName
+        - body.content[0].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[0].type
-        - "收款"
+        - body.content[0].action
+        - "OUT"
     -   eq:
         - body.content[0].billType
-        - "租金"
+        - "物业费"
     -   eq:
         - body.content[0].amount
-        - 200
+        - 35.5
     -   eq:
-        - body.content[1].tenantName
+        - body.content[1].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[1].type
-        - "收款"
+        - body.content[1].action
+        - "OUT"
     -   eq:
         - body.content[1].billType
         - "租金保证金"
     -   eq:
         - body.content[1].amount
-        - 50
+        - 30
     -   eq:
-        - body.content[2].tenantName
+        - body.content[2].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[2].type
-        - "付款"
+        - body.content[2].action
+        - "OUT"
     -   eq:
         - body.content[2].billType
         - "租金"
     -   eq:
-        - body.content[2].carryAmount
+        - body.content[2].amount
         - 100
     -   eq:
-        - body.content[3].tenantName
+        - body.content[3].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[3].type
-        - "付款"
+        - body.content[3].action
+        - "IN"
     -   eq:
         - body.content[3].billType
+        - "物业费"
+    -   eq:
+        - body.content[3].amount
+        - 15.5
+    -   eq:
+        - body.content[4].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "IN"
+    -   eq:
+        - body.content[4].billType
         - "租金保证金"
     -   eq:
-        - body.content[3].carryAmount
+        - body.content[4].amount
+        - 50
+    -   eq:
+        - body.content[5].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "IN"
+    -   eq:
+        - body.content[5].billType
+        - "租金"
+    -   eq:
+        - body.content[5].amount
+        - 200
+    -   eq:
+        - body.content[6].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[6].action
+        - "IN"
+    -   eq:
+        - body.content[6].billType
+        - "租金"
+    -   eq:
+        - body.content[6].amount
+        - 3041.67
+    -   eq:
+        - body.content[7].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[7].action
+        - "IN"
+    -   eq:
+        - body.content[7].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[7].amount
+        - 3041.67
+
+-   name: 现金流预测详情--租金、按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-09-30'
+            startDate: '2021-07-01'
+            page: '0'
+            size: '100'
+            temporalUnit: QUARTER
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 100
+    -   eq:
+        - body.content[1].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 200
+    -   eq:
+        - body.content[2].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金"
+    -   eq:
+        - body.content[2].amount
+        - 98.12
+    -   eq:
+        - body.content[3].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "IN"
+    -   eq:
+        - body.content[3].billType
+        - "租金"
+    -   eq:
+        - body.content[3].amount
+        - 3041.67
+
+-   name: 现金流预测详情--租金+租金保证金、按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-09-30'
+            startDate: '2021-07-01'
+            page: '0'
+            size: '100'
+            temporalUnit: QUARTER
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
         - 30
+    -   eq:
+        - body.content[1].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "OUT"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+    -   eq:
+        - body.content[2].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[2].amount
+        - 50
+    -   eq:
+        - body.content[3].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "IN"
+    -   eq:
+        - body.content[3].billType
+        - "租金"
+    -   eq:
+        - body.content[3].amount
+        - 200
+    -   eq:
+        - body.content[4].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "IN"
+    -   eq:
+        - body.content[4].billType
+        - "租金"
+    -   eq:
+        - body.content[4].amount
+        - 98.12
+    -   eq:
+        - body.content[5].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "IN"
+    -   eq:
+        - body.content[5].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[5].amount
+        - 0
+    -   eq:
+        - body.content[6].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[6].action
+        - "IN"
+    -   eq:
+        - body.content[6].billType
+        - "租金"
+    -   eq:
+        - body.content[6].amount
+        - 3041.67
+    -   eq:
+        - body.content[7].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[7].action
+        - "IN"
+    -   eq:
+        - body.content[7].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[7].amount
+        - 3041.67
 
 -   name: 现金流预测详情--按季查询
     request:
@@ -407,53 +863,309 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body.content[0].tenantName
+        - body.content[0].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[0].type
-        - "收款"
+        - body.content[0].action
+        - "OUT"
     -   eq:
         - body.content[0].billType
-        - "租金"
+        - "物业费"
     -   eq:
         - body.content[0].amount
-        - 200
+        - 35.5
     -   eq:
-        - body.content[1].tenantName
+        - body.content[1].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[1].type
-        - "收款"
+        - body.content[1].action
+        - "OUT"
     -   eq:
         - body.content[1].billType
         - "租金保证金"
     -   eq:
         - body.content[1].amount
-        - 50
+        - 30
     -   eq:
-        - body.content[2].tenantName
+        - body.content[2].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[2].type
-        - "付款"
+        - body.content[2].action
+        - "OUT"
     -   eq:
         - body.content[2].billType
         - "租金"
     -   eq:
-        - body.content[2].carryAmount
+        - body.content[2].amount
         - 100
     -   eq:
-        - body.content[3].tenantName
+        - body.content[3].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[3].type
-        - "付款"
+        - body.content[3].action
+        - "IN"
     -   eq:
         - body.content[3].billType
+        - "物业费"
+    -   eq:
+        - body.content[3].amount
+        - 15.5
+    -   eq:
+        - body.content[4].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "IN"
+    -   eq:
+        - body.content[4].billType
         - "租金保证金"
     -   eq:
-        - body.content[3].carryAmount
+        - body.content[4].amount
+        - 50
+    -   eq:
+        - body.content[5].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "IN"
+    -   eq:
+        - body.content[5].billType
+        - "租金"
+    -   eq:
+        - body.content[5].amount
+        - 200
+    -   eq:
+        - body.content[6].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[6].action
+        - "IN"
+    -   eq:
+        - body.content[6].billType
+        - "租金"
+    -   eq:
+        - body.content[6].amount
+        - 98.12
+    -   eq:
+        - body.content[7].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[7].action
+        - "IN"
+    -   eq:
+        - body.content[7].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[7].amount
+        - 0
+    -   eq:
+        - body.content[8].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[8].action
+        - "IN"
+    -   eq:
+        - body.content[8].billType
+        - "租金"
+    -   eq:
+        - body.content[8].amount
+        - 3041.67
+    -   eq:
+        - body.content[9].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[9].action
+        - "IN"
+    -   eq:
+        - body.content[9].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[9].amount
+        - 3041.67
+
+-   name: 现金流预测详情--租金、按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-12-31'
+            startDate: '2021-01-01'
+            page: '0'
+            size: '100'
+            temporalUnit: YEAR
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 100
+    -   eq:
+        - body.content[1].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 200
+    -   eq:
+        - body.content[2].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金"
+    -   eq:
+        - body.content[2].amount
+        - 98.12
+    -   eq:
+        - body.content[3].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "IN"
+    -   eq:
+        - body.content[3].billType
+        - "租金"
+    -   eq:
+        - body.content[3].amount
+        - 3041.67
+
+-   name: 现金流预测详情--租金+租金保证金、按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            billSelectAmount: AMOUNT
+            buildingIds: $building_id
+            endDate: '2021-12-31'
+            startDate: '2021-01-01'
+            page: '0'
+            size: '100'
+            temporalUnit: YEAR
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflow-predictions/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
         - 30
+    -   eq:
+        - body.content[1].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "OUT"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+    -   eq:
+        - body.content[2].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[2].amount
+        - 50
+    -   eq:
+        - body.content[3].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "IN"
+    -   eq:
+        - body.content[3].billType
+        - "租金"
+    -   eq:
+        - body.content[3].amount
+        - 200
+    -   eq:
+        - body.content[4].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "IN"
+    -   eq:
+        - body.content[4].billType
+        - "租金"
+    -   eq:
+        - body.content[4].amount
+        - 98.12
+    -   eq:
+        - body.content[5].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "IN"
+    -   eq:
+        - body.content[5].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[5].amount
+        - 0
+    -   eq:
+        - body.content[6].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[6].action
+        - "IN"
+    -   eq:
+        - body.content[6].billType
+        - "租金"
+    -   eq:
+        - body.content[6].amount
+        - 3041.67
+    -   eq:
+        - body.content[7].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[7].action
+        - "IN"
+    -   eq:
+        - body.content[7].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[7].amount
+        - 3041.67
 
 -   name: 现金流预测详情--按年查询
     request:
@@ -474,53 +1186,125 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body.content[0].tenantName
+        - body.content[0].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[0].type
-        - "收款"
+        - body.content[0].action
+        - "OUT"
     -   eq:
         - body.content[0].billType
-        - "租金"
+        - "物业费"
     -   eq:
         - body.content[0].amount
-        - 200
+        - 35.5
     -   eq:
-        - body.content[1].tenantName
+        - body.content[1].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[1].type
-        - "收款"
+        - body.content[1].action
+        - "OUT"
     -   eq:
         - body.content[1].billType
         - "租金保证金"
     -   eq:
         - body.content[1].amount
-        - 50
+        - 30
     -   eq:
-        - body.content[2].tenantName
+        - body.content[2].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[2].type
-        - "付款"
+        - body.content[2].action
+        - "OUT"
     -   eq:
         - body.content[2].billType
         - "租金"
     -   eq:
-        - body.content[2].carryAmount
+        - body.content[2].amount
         - 100
     -   eq:
-        - body.content[3].tenantName
+        - body.content[3].other
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[3].type
-        - "付款"
+        - body.content[3].action
+        - "IN"
     -   eq:
         - body.content[3].billType
+        - "物业费"
+    -   eq:
+        - body.content[3].amount
+        - 15.5
+    -   eq:
+        - body.content[4].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "IN"
+    -   eq:
+        - body.content[4].billType
         - "租金保证金"
     -   eq:
-        - body.content[3].carryAmount
-        - 30
+        - body.content[4].amount
+        - 50
+    -   eq:
+        - body.content[5].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "IN"
+    -   eq:
+        - body.content[5].billType
+        - "租金"
+    -   eq:
+        - body.content[5].amount
+        - 200
+    -   eq:
+        - body.content[6].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[6].action
+        - "IN"
+    -   eq:
+        - body.content[6].billType
+        - "租金"
+    -   eq:
+        - body.content[6].amount
+        - 98.12
+    -   eq:
+        - body.content[7].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[7].action
+        - "IN"
+    -   eq:
+        - body.content[7].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[7].amount
+        - 0
+    -   eq:
+        - body.content[8].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[8].action
+        - "IN"
+    -   eq:
+        - body.content[8].billType
+        - "租金"
+    -   eq:
+        - body.content[8].amount
+        - 3041.67
+    -   eq:
+        - body.content[9].other
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[9].action
+        - "IN"
+    -   eq:
+        - body.content[9].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[9].amount
+        - 3041.67
 
 -   name: 删除楼宇
     request:

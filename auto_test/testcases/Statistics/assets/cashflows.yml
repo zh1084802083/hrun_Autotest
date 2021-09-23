@@ -6,26 +6,11 @@ config:
         startDate: '2021-01-01'
     export:
         - building_id
-        - payedAmount_in
-        - carryInAmount_in
-        - payedAmount_in_1
-        - carryInAmount_in_1
-        - payedAmount_in_2
-        - carryInAmount_in_2
-        - payedAmount_out
-        - carryInAmount_out
-        - payedAmount_out_1
-        - carryInAmount_out_1
-        - payedAmount_out_2
-        - carryInAmount_out_2
 teststeps:
 -   name: 添加账单收入、支出数据
     testcase: testcases/Account/create_bills.yml
 
--   name: 资产评估--现金流--按租金、月统计
-    setup_hooks:
-        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
-        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
+-   name: 资产评估--现金流--按租金+收支流水、月统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -43,19 +28,16 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[8].costAmount
-        - $Amount_out_1
+        - body.8.costAmount
+        - 100
     -   eq:
-        - body[8].incomeAmount
-        - $incomeAmount_expect_1
+        - body.8.incomeAmount
+        - 100
     -   eq:
-        - body[8].worthAmount
-        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+        - body.8.worthAmount
+        - 0
 
--   name: 资产评估--现金流--按租金+租金保证金、月统计
-    setup_hooks:
-        - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
-        - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
+-   name: 资产评估--现金流--按租金+租金保证金+收支流水、月统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -73,19 +55,25 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[8].costAmount
-        - $Amount_out_2
+        - body.7.costAmount
+        - 0
     -   eq:
-        - body[8].incomeAmount
-        - $incomeAmount_expect_2
+        - body.7.incomeAmount
+        - 3041.67
     -   eq:
-        - body[8].worthAmount
-        - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
+        - body.7.worthAmount
+        - 3041.67
+    -   eq:
+        - body.8.costAmount
+        - 120
+    -   eq:
+        - body.8.incomeAmount
+        - 150
+    -   eq:
+        - body.8.worthAmount
+        - 30
 
--   name: 资产评估--现金流--按月统计
-    setup_hooks:
-        - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
-        - Amount_out: ${sum_two($payedAmount_out, $carryInAmount_out)}
+-   name: 资产评估--现金流--收支流水、按月统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -102,19 +90,25 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[8].costAmount
-        - $Amount_out
+        - body.7.costAmount
+        - 0
     -   eq:
-        - body[8].incomeAmount
-        - $incomeAmount_expect
+        - body.7.incomeAmount
+        - 3041.67
     -   eq:
-        - body[8].worthAmount
-        - ${reduce_two($incomeAmount_expect, $Amount_out)}
+        - body.7.worthAmount
+        - 3041.67
+    -   eq:
+        - body.8.costAmount
+        - 155.5
+    -   eq:
+        - body.8.incomeAmount
+        - 165.5
+    -   eq:
+        - body.8.worthAmount
+        - 10
 
--   name: 资产评估--现金流--按租金、季度统计
-    setup_hooks:
-        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
-        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
+-   name: 资产评估--现金流--按租金+收支流水、季度统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -132,19 +126,16 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[2].costAmount
-        - $Amount_out_1
+        - body.2.costAmount
+        - 100
     -   eq:
-        - body[2].incomeAmount
-        - $incomeAmount_expect_1
+        - body.2.incomeAmount
+        - 100
     -   eq:
-        - body[2].worthAmount
-        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+        - body.2.worthAmount
+        - 0
 
--   name: 资产评估--现金流--按租金+租金保证金、季度统计
-    setup_hooks:
-        - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
-        - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
+-   name: 资产评估--现金流--按租金+租金保证金+收支流水、季度统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -162,19 +153,16 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[2].costAmount
-        - $Amount_out_2
+        - body.2.costAmount
+        - 120
     -   eq:
-        - body[2].incomeAmount
-        - $incomeAmount_expect_2
+        - body.2.incomeAmount
+        - 3191.67
     -   eq:
-        - body[2].worthAmount
-        - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
+        - body.2.worthAmount
+        - 3071.67
 
--   name: 资产评估--现金流--按季度统计
-    setup_hooks:
-        - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
-        - Amount_out: ${sum_two($payedAmount_out, $carryInAmount_out)}
+-   name: 资产评估--现金流--收支流水、按季度统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -191,19 +179,16 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[2].costAmount
-        - $Amount_out
+        - body.2.costAmount
+        - 155.5
     -   eq:
-        - body[2].incomeAmount
-        - $incomeAmount_expect
+        - body.2.incomeAmount
+        - 3207.17
     -   eq:
-        - body[2].worthAmount
-        - ${reduce_two($incomeAmount_expect, $Amount_out)}
+        - body.2.worthAmount
+        - 3051.67
 
--   name: 资产评估--现金流--按租金、年统计
-    setup_hooks:
-        - incomeAmount_expect_1: ${sum_two($payedAmount_in_1, $carryInAmount_in_1)}
-        - Amount_out_1: ${sum_two($payedAmount_out_1, $carryInAmount_out_1)}
+-   name: 资产评估--现金流--按租金+收支流水、年统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -221,19 +206,16 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[0].costAmount
-        - $Amount_out_1
+        - body.0.costAmount
+        - 100
     -   eq:
-        - body[0].incomeAmount
-        - $incomeAmount_expect_1
+        - body.0.incomeAmount
+        - 100
     -   eq:
-        - body[0].worthAmount
-        - ${reduce_two($incomeAmount_expect_1, $Amount_out_1)}
+        - body.0.worthAmount
+        - 0
 
--   name: 资产评估--现金流--按租金+租金保证金、年统计
-    setup_hooks:
-        - incomeAmount_expect_2: ${sum_two($payedAmount_in_2, $carryInAmount_in_2)}
-        - Amount_out_2: ${sum_two($payedAmount_out_2, $carryInAmount_out_2)}
+-   name: 资产评估--现金流--按租金+租金保证金+收支流水、年统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -251,19 +233,16 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[0].costAmount
-        - $Amount_out_2
+        - body.0.costAmount
+        - 120
     -   eq:
-        - body[0].incomeAmount
-        - $incomeAmount_expect_2
+        - body.0.incomeAmount
+        - 3191.67
     -   eq:
-        - body[0].worthAmount
-        - ${reduce_two($incomeAmount_expect_2, $Amount_out_2)}
+        - body.0.worthAmount
+        - 3071.67
 
--   name: 资产评估--现金流--按年统计
-    setup_hooks:
-        - incomeAmount_expect: ${sum_two($payedAmount_in, $carryInAmount_in)}
-        - Amount_out: ${sum_two($payedAmount_out, $carryInAmount_out)}
+-   name: 资产评估--现金流--收支流水、按年统计
     request:
         headers:
             authorization: Bearer $access_token
@@ -280,16 +259,689 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body[0].costAmount
-        - $Amount_out
+        - body.0.costAmount
+        - 155.5
     -   eq:
-        - body[0].incomeAmount
-        - $incomeAmount_expect
+        - body.0.incomeAmount
+        - 3207.17
     -   eq:
-        - body[0].worthAmount
-        - ${reduce_two($incomeAmount_expect, $Amount_out)}
+        - body.0.worthAmount
+        - 3051.67
 
--   name: 数据舱--现金流详情--按月查看
+-   name: 资产评估--现金流--按租金+结转、月统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.costAmount
+        - 0
+    -   eq:
+        - body.8.incomeAmount
+        - 98.12
+    -   eq:
+        - body.8.worthAmount
+        - 98.12
+
+-   name: 资产评估--现金流--按租金+租金保证金+结转、月统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.costAmount
+        - 98.12
+    -   eq:
+        - body.8.incomeAmount
+        - 98.12
+    -   eq:
+        - body.8.worthAmount
+        - 0
+
+-   name: 资产评估--现金流--结转、月统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.costAmount
+        - 98.12
+    -   eq:
+        - body.8.incomeAmount
+        - 98.12
+    -   eq:
+        - body.8.worthAmount
+        - 0
+
+-   name: 资产评估--现金流--租金+结转、按季统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.costAmount
+        - 0
+    -   eq:
+        - body.2.incomeAmount
+        - 98.12
+    -   eq:
+        - body.2.worthAmount
+        - 98.12
+
+-   name: 资产评估--现金流--租金+租金保证金+结转、按季统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.costAmount
+        - 98.12
+    -   eq:
+        - body.2.incomeAmount
+        - 98.12
+    -   eq:
+        - body.2.worthAmount
+        - 0
+
+-   name: 资产评估--现金流--结转、按季统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.costAmount
+        - 98.12
+    -   eq:
+        - body.2.incomeAmount
+        - 98.12
+    -   eq:
+        - body.2.worthAmount
+        - 0
+
+-   name: 资产评估--现金流--租金+结转、按年统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.costAmount
+        - 0
+    -   eq:
+        - body.0.incomeAmount
+        - 98.12
+    -   eq:
+        - body.0.worthAmount
+        - 98.12
+
+-   name: 资产评估--现金流--租金+租金保证金+结转、按年统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.costAmount
+        - 98.12
+    -   eq:
+        - body.0.incomeAmount
+        - 98.12
+    -   eq:
+        - body.0.worthAmount
+        - 0
+
+-   name: 资产评估--现金流--结转、按年统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.costAmount
+        - 98.12
+    -   eq:
+        - body.0.incomeAmount
+        - 98.12
+    -   eq:
+        - body.0.worthAmount
+        - 0
+
+-   name: 资产评估--现金流--按租金+收支流水+结转、月统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.costAmount
+        - 100
+    -   eq:
+        - body.8.incomeAmount
+        - 198.12
+    -   eq:
+        - body.8.worthAmount
+        - 98.12
+
+-   name: 资产评估--现金流--按租金+租金保证金+收支流水+结转、月统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.7.costAmount
+        - 0
+    -   eq:
+        - body.7.incomeAmount
+        - 3041.67
+    -   eq:
+        - body.7.worthAmount
+        - 3041.67
+    -   eq:
+        - body.8.costAmount
+        - 218.12
+    -   eq:
+        - body.8.incomeAmount
+        - 248.12
+    -   eq:
+        - body.8.worthAmount
+        - 30
+
+-   name: 资产评估--现金流--收支流水+结转、月统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.7.costAmount
+        - 0
+    -   eq:
+        - body.7.incomeAmount
+        - 3041.67
+    -   eq:
+        - body.7.worthAmount
+        - 3041.67
+    -   eq:
+        - body.8.costAmount
+        - 253.62
+    -   eq:
+        - body.8.incomeAmount
+        - 263.62
+    -   eq:
+        - body.8.worthAmount
+        - 10
+
+-   name: 资产评估--现金流--按租金+收支流水+结转、季统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.costAmount
+        - 100
+    -   eq:
+        - body.2.incomeAmount
+        - 198.12
+    -   eq:
+        - body.2.worthAmount
+        - 98.12
+
+-   name: 资产评估--现金流--按租金+租金保证金+收支流水+结转、季统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.costAmount
+        - 218.12
+    -   eq:
+        - body.2.incomeAmount
+        - 3289.79
+    -   eq:
+        - body.2.worthAmount
+        - 3071.67
+
+-   name: 资产评估--现金流--收支流水+结转、季统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.costAmount
+        - 253.62
+    -   eq:
+        - body.2.incomeAmount
+        - 3305.29
+    -   eq:
+        - body.2.worthAmount
+        - 3051.67
+
+-   name: 资产评估--现金流--按租金+收支流水+结转、年统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.costAmount
+        - 100
+    -   eq:
+        - body.0.incomeAmount
+        - 198.12
+    -   eq:
+        - body.0.worthAmount
+        - 98.12
+
+-   name: 资产评估--现金流--按租金+租金保证金+收支流水+结转、年统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.costAmount
+        - 218.12
+    -   eq:
+        - body.0.incomeAmount
+        - 3289.79
+    -   eq:
+        - body.0.worthAmount
+        - 3071.67
+
+-   name: 资产评估--现金流--收支流水+结转、年统计
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD,CASH_MATCH
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/cashflows
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.costAmount
+        - 253.62
+    -   eq:
+        - body.0.incomeAmount
+        - 3305.29
+    -   eq:
+        - body.0.worthAmount
+        - 3051.67
+
+-   name: 数据舱--现金流详情--租金+收支流水、按月查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: '2021-09-30'
+            startDate: '2021-09-01'
+            page: '0'
+            size: '20'
+            temporalUnit: MONTH
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 100
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "OUT"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+
+-   name: 数据舱--现金流详情--租金+租金保证金+收支流水、按月查看-8
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: '2021-08-31'
+            startDate: '2021-08-01'
+            page: '0'
+            size: '20'
+            temporalUnit: MONTH
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 3041.67
+
+-   name: 数据舱--现金流详情--租金+租金保证金+收支流水、按月查看-9
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: '2021-09-30'
+            startDate: '2021-09-01'
+            page: '0'
+            size: '20'
+            temporalUnit: MONTH
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 100
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[1].amount
+        - 50
+    -   eq:
+        - body.content[2].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "OUT"
+    -   eq:
+        - body.content[2].billType
+        - "租金"
+    -   eq:
+        - body.content[2].amount
+        - 100
+    -   eq:
+        - body.content[3].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "OUT"
+    -   eq:
+        - body.content[3].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[3].amount
+        - 20
+
+-   name: 数据舱--现金流详情--收支流水、按月查看-8
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: '2021-08-31'
+            startDate: '2021-08-01'
+            page: '0'
+            size: '20'
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 3041.67
+
+-   name: 数据舱--现金流详情--收支流水、按月查看-9
     request:
         headers:
             authorization: Bearer $access_token
@@ -311,52 +963,200 @@ teststeps:
         - body.content[0].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[0].type
-        - "收款"
+        - body.content[0].action
+        - "IN"
     -   eq:
         - body.content[0].billType
         - "租金"
     -   eq:
-        - body.content[0].carryAmount
-        - 200
+        - body.content[0].amount
+        - 100
     -   eq:
         - body.content[1].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[1].type
-        - "收款"
+        - body.content[1].action
+        - "IN"
     -   eq:
         - body.content[1].billType
         - "租金保证金"
     -   eq:
-        - body.content[1].carryAmount
+        - body.content[1].amount
         - 50
     -   eq:
         - body.content[2].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[2].type
-        - "付款"
+        - body.content[2].action
+        - "IN"
     -   eq:
         - body.content[2].billType
-        - "租金"
+        - "物业费"
     -   eq:
-        - body.content[2].carryAmount
-        - 100
+        - body.content[2].amount
+        - 15.5
     -   eq:
         - body.content[3].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[3].type
-        - "付款"
+        - body.content[3].action
+        - "OUT"
     -   eq:
         - body.content[3].billType
+        - "租金"
+    -   eq:
+        - body.content[3].amount
+        - 100
+    -   eq:
+        - body.content[4].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "OUT"
+    -   eq:
+        - body.content[4].billType
         - "租金保证金"
     -   eq:
-        - body.content[3].carryAmount
-        - 30
+        - body.content[4].amount
+        - 20
+    -   eq:
+        - body.content[5].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "OUT"
+    -   eq:
+        - body.content[5].billType
+        - "物业费"
+    -   eq:
+        - body.content[5].amount
+        - 35.5
 
--   name: 数据舱--现金流详情--按季度查看
+-   name: 数据舱--现金流详情--租金+收支流水、按季度查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: '2021-09-30'
+            startDate: '2021-07-01'
+            page: '0'
+            size: '20'
+            temporalUnit: QUARTER
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 100
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "OUT"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+
+-   name: 数据舱--现金流详情--租金+租金保证金+收支流水、按季度查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            endDate: '2021-09-30'
+            startDate: '2021-07-01'
+            page: '0'
+            size: '20'
+            temporalUnit: QUARTER
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 3041.67
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+    -   eq:
+        - body.content[2].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[2].amount
+        - 50
+    -   eq:
+        - body.content[3].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "OUT"
+    -   eq:
+        - body.content[3].billType
+        - "租金"
+    -   eq:
+        - body.content[3].amount
+        - 100
+    -   eq:
+        - body.content[4].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "OUT"
+    -   eq:
+        - body.content[4].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[4].amount
+        - 20
+
+-   name: 数据舱--现金流详情--收支流水、按季度查看
     request:
         headers:
             authorization: Bearer $access_token
@@ -378,52 +1178,212 @@ teststeps:
         - body.content[0].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[0].type
-        - "收款"
+        - body.content[0].action
+        - "IN"
     -   eq:
         - body.content[0].billType
-        - "租金"
+        - "租金保证金"
     -   eq:
-        - body.content[0].carryAmount
-        - 200
+        - body.content[0].amount
+        - 3041.67
     -   eq:
         - body.content[1].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[1].type
-        - "收款"
+        - body.content[1].action
+        - "IN"
     -   eq:
         - body.content[1].billType
-        - "租金保证金"
+        - "租金"
     -   eq:
-        - body.content[1].carryAmount
-        - 50
+        - body.content[1].amount
+        - 100
     -   eq:
         - body.content[2].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[2].type
-        - "付款"
+        - body.content[2].action
+        - "IN"
     -   eq:
         - body.content[2].billType
-        - "租金"
+        - "租金保证金"
     -   eq:
-        - body.content[2].carryAmount
-        - 100
+        - body.content[2].amount
+        - 50
     -   eq:
         - body.content[3].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[3].type
-        - "付款"
+        - body.content[3].action
+        - "IN"
     -   eq:
         - body.content[3].billType
+        - "物业费"
+    -   eq:
+        - body.content[3].amount
+        - 15.5
+    -   eq:
+        - body.content[4].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "OUT"
+    -   eq:
+        - body.content[4].billType
+        - "租金"
+    -   eq:
+        - body.content[4].amount
+        - 100
+    -   eq:
+        - body.content[5].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "OUT"
+    -   eq:
+        - body.content[5].billType
         - "租金保证金"
     -   eq:
-        - body.content[3].carryAmount
-        - 30
+        - body.content[5].amount
+        - 20
+    -   eq:
+        - body.content[6].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[6].action
+        - "OUT"
+    -   eq:
+        - body.content[6].billType
+        - "物业费"
+    -   eq:
+        - body.content[6].amount
+        - 35.5
 
--   name: 数据舱--现金流详情--按年查看
+-   name: 数据舱--现金流详情--租金+收支流水、按年查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            startDate: '2021-01-01'
+            endDate: '2021-12-31'
+            page: '0'
+            size: '20'
+            temporalUnit: YEAR
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 100
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "OUT"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+
+-   name: 数据舱--现金流详情--租金+租金保证金+收支流水、按年查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CASH_MATCH
+            startDate: '2021-01-01'
+            endDate: '2021-12-31'
+            page: '0'
+            size: '20'
+            temporalUnit: YEAR
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 3041.67
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+    -   eq:
+        - body.content[2].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[2].amount
+        - 50
+    -   eq:
+        - body.content[3].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "OUT"
+    -   eq:
+        - body.content[3].billType
+        - "租金"
+    -   eq:
+        - body.content[3].amount
+        - 100
+    -   eq:
+        - body.content[4].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "OUT"
+    -   eq:
+        - body.content[4].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[4].amount
+        - 20
+
+-   name: 数据舱--现金流详情--收支流水、按年查看
     request:
         headers:
             authorization: Bearer $access_token
@@ -445,50 +1405,444 @@ teststeps:
         - body.content[0].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[0].type
-        - "收款"
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 3041.67
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 100
+    -   eq:
+        - body.content[2].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[2].action
+        - "IN"
+    -   eq:
+        - body.content[2].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[2].amount
+        - 50
+    -   eq:
+        - body.content[3].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[3].action
+        - "IN"
+    -   eq:
+        - body.content[3].billType
+        - "物业费"
+    -   eq:
+        - body.content[3].amount
+        - 15.5
+    -   eq:
+        - body.content[4].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[4].action
+        - "OUT"
+    -   eq:
+        - body.content[4].billType
+        - "租金"
+    -   eq:
+        - body.content[4].amount
+        - 100
+    -   eq:
+        - body.content[5].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[5].action
+        - "OUT"
+    -   eq:
+        - body.content[5].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[5].amount
+        - 20
+    -   eq:
+        - body.content[6].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[6].action
+        - "OUT"
+    -   eq:
+        - body.content[6].billType
+        - "物业费"
+    -   eq:
+        - body.content[6].amount
+        - 35.5
+
+-   name: 数据舱--现金流详情--租金+结转、按月查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-09-30'
+            startDate: '2021-09-01'
+            page: '0'
+            size: '20'
+            temporalUnit: MONTH
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
     -   eq:
         - body.content[0].billType
         - "租金"
     -   eq:
         - body.content[0].amount
+        - 98.12
+
+-   name: 数据舱--现金流详情--租金+租金保证金+结转、按月查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-09-30'
+            startDate: '2021-09-01'
+            page: '0'
+            size: '20'
+            temporalUnit: MONTH
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
         - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
     -   eq:
         - body.content[1].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[1].type
-        - "收款"
+        - body.content[1].action
+        - "IN"
     -   eq:
         - body.content[1].billType
-        - "租金保证金"
-    -   eq:
-        - body.content[1].carryAmount
-        - 50
-    -   eq:
-        - body.content[2].tenantName
-        - "湖南神雀网络科技有限公司"
-    -   eq:
-        - body.content[2].type
-        - "付款"
-    -   eq:
-        - body.content[2].billType
         - "租金"
     -   eq:
-        - body.content[2].carryAmount
-        - 100
+        - body.content[1].amount
+        - 98.12
+
+-   name: 数据舱--现金流详情--结转、按月查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-09-30'
+            startDate: '2021-09-01'
+            page: '0'
+            size: '20'
+            temporalUnit: MONTH
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
     -   eq:
-        - body.content[3].tenantName
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
         - "湖南神雀网络科技有限公司"
     -   eq:
-        - body.content[3].type
-        - "付款"
+        - body.content[0].action
+        - "OUT"
     -   eq:
-        - body.content[3].billType
+        - body.content[0].billType
         - "租金保证金"
     -   eq:
-        - body.content[3].carryAmount
-        - 30
+        - body.content[0].amount
+        - 98.12
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 98.12
+
+-   name: 数据舱--现金流详情--租金+结转、按季查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-09-30'
+            startDate: '2021-07-01'
+            page: '0'
+            size: '20'
+            temporalUnit: QUARTER
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+
+-   name: 数据舱--现金流详情--租金+租金保证金+结转、按季查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-09-30'
+            startDate: '2021-07-01'
+            page: '0'
+            size: '20'
+            temporalUnit: QUARTER
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 98.12
+
+-   name: 数据舱--现金流详情--结转、按季查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-09-30'
+            startDate: '2021-07-01'
+            page: '0'
+            size: '20'
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 98.12
+
+-   name: 数据舱--现金流详情--租金+结转、按年查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-12-31'
+            startDate: '2021-01-01'
+            page: '0'
+            size: '20'
+            temporalUnit: YEAR
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "IN"
+    -   eq:
+        - body.content[0].billType
+        - "租金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+
+-   name: 数据舱--现金流详情--租金+租金保证金+结转、按年查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-12-31'
+            startDate: '2021-01-01'
+            page: '0'
+            size: '20'
+            temporalUnit: YEAR
+            billTypes: 租金,租金保证金
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 98.12
+
+-   name: 数据舱--现金流详情--结转、按年查看
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            domainTypes: CARRY_FORWARD
+            endDate: '2021-12-31'
+            startDate: '2021-01-01'
+            page: '0'
+            size: '20'
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/cashflows/detail
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.content[0].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[0].action
+        - "OUT"
+    -   eq:
+        - body.content[0].billType
+        - "租金保证金"
+    -   eq:
+        - body.content[0].amount
+        - 98.12
+    -   eq:
+        - body.content[1].tenantName
+        - "湖南神雀网络科技有限公司"
+    -   eq:
+        - body.content[1].action
+        - "IN"
+    -   eq:
+        - body.content[1].billType
+        - "租金"
+    -   eq:
+        - body.content[1].amount
+        - 98.12
 
 -   name: 删除楼宇
     request:
