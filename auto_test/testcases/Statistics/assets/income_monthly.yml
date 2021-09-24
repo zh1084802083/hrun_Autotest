@@ -8,8 +8,78 @@ config:
     export:
         - building_id
 teststeps:
--   name: 获取楼宇id
-    testcase: testcases/Buildings/buildings.yml
+-   name: 添加账单收入、支出数据
+    testcase: testcases/Account/create_bills.yml
+
+-   name: 收益--租金、按月查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.7.costAmount
+        - 0
+    -   eq:
+        - body.7.incomeAmount
+        - 98.12
+    -   eq:
+        - body.7.profitAmount
+        - 98.12
+    -   eq:
+        - body.8.costAmount
+        - 100
+    -   eq:
+        - body.8.incomeAmount
+        - 3241.67
+    -   eq:
+        - body.8.profitAmount
+        - 3141.67
+
+-   name: 收益--租金+物业费按月查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: MONTH
+            billTypes: 租金,物业费
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.7.costAmount
+        - 0
+    -   eq:
+        - body.7.incomeAmount
+        - 98.12
+    -   eq:
+        - body.7.profitAmount
+        - 98.12
+    -   eq:
+        - body.8.costAmount
+        - 135.5
+    -   eq:
+        - body.8.incomeAmount
+        - 3257.17
+    -   eq:
+        - body.8.profitAmount
+        - 3121.67
 
 -   name: 收益--按月查询
     request:
@@ -21,12 +91,81 @@ teststeps:
             endDate: $endDate
             startDate: $startDate
             temporalUnit: MONTH
-            billTypes: '租金,物业费'
         url: ${ENV(api_url)}/assets/income/monthly
     validate:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.7.costAmount
+        - 0
+    -   eq:
+        - body.7.incomeAmount
+        - 98.12
+    -   eq:
+        - body.7.profitAmount
+        - 98.12
+    -   eq:
+        - body.8.costAmount
+        - 135.5
+    -   eq:
+        - body.8.incomeAmount
+        - 3257.17
+    -   eq:
+        - body.8.profitAmount
+        - 3121.67
+
+-   name: 收益--租金、按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.costAmount
+        - 100
+    -   eq:
+        - body.2.incomeAmount
+        - 3339.79
+    -   eq:
+        - body.2.profitAmount
+        - 3239.79
+
+-   name: 收益--租金+物业费、按季查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: QUARTER
+            billTypes: 租金,物业费
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.costAmount
+        - 135.5
+    -   eq:
+        - body.2.incomeAmount
+        - 3355.29
+    -   eq:
+        - body.2.profitAmount
+        - 3219.79
 
 -   name: 收益--按季查询
     request:
@@ -38,12 +177,72 @@ teststeps:
             endDate: $endDate
             startDate: $startDate
             temporalUnit: QUARTER
-            billTypes: '租金,物业费'
         url: ${ENV(api_url)}/assets/income/monthly
     validate:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.2.costAmount
+        - 135.5
+    -   eq:
+        - body.2.incomeAmount
+        - 3355.29
+    -   eq:
+        - body.2.profitAmount
+        - 3219.79
+
+-   name: 收益--租金、按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: 租金
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.costAmount
+        - 100
+    -   eq:
+        - body.0.incomeAmount
+        - 3339.79
+    -   eq:
+        - body.0.profitAmount
+        - 3239.79
+
+-   name: 收益--租金+物业费、按年查询
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            buildingIds: $building_id
+            endDate: $endDate
+            startDate: $startDate
+            temporalUnit: YEAR
+            billTypes: 租金,物业费
+        url: ${ENV(api_url)}/assets/income/monthly
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.costAmount
+        - 135.5
+    -   eq:
+        - body.0.incomeAmount
+        - 3355.29
+    -   eq:
+        - body.0.profitAmount
+        - 3219.79
 
 -   name: 收益--按年查询
     request:
@@ -55,9 +254,29 @@ teststeps:
             endDate: $endDate
             startDate: $startDate
             temporalUnit: YEAR
-            billTypes: '租金,物业费'
         url: ${ENV(api_url)}/assets/income/monthly
     validate:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.0.costAmount
+        - 135.5
+    -   eq:
+        - body.0.incomeAmount
+        - 3355.29
+    -   eq:
+        - body.0.profitAmount
+        - 3219.79
+
+-   name: 删除楼宇
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        method: DELETE
+        url: ${ENV(api_url)}/buildings/$building_id
+    validate:
+    -   eq:
+        - status_code
+        - 204

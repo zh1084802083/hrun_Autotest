@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from httprunner import HttpRunner, Config, Step, RunRequest, RunTestCase
 
-from testcases.Buildings.buildings_test import TestCaseBuildings as Buildings
+from testcases.Account.create_bills_test import TestCaseCreateBills as CreateBills
 
 
 class TestCaseIncomeMonthly(HttpRunner):
@@ -29,9 +29,35 @@ class TestCaseIncomeMonthly(HttpRunner):
     )
 
     teststeps = [
-        Step(RunTestCase("获取楼宇id").call(Buildings).export(*["building_id"])),
         Step(
-            RunRequest("收益--按月查询")
+            RunTestCase("添加账单收入、支出数据")
+            .call(CreateBills)
+            .export(*["building_id", "room_id"])
+        ),
+        Step(
+            RunRequest("收益--租金、按月查询")
+            .get("${ENV(api_url)}/assets/income/monthly")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "MONTH",
+                    "billTypes": "租金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[7].costAmount", 0)
+            .assert_equal("body[7].incomeAmount", 98.12)
+            .assert_equal("body[7].profitAmount", 98.12)
+            .assert_equal("body[8].costAmount", 100)
+            .assert_equal("body[8].incomeAmount", 3241.67)
+            .assert_equal("body[8].profitAmount", 3141.67)
+        ),
+        Step(
+            RunRequest("收益--租金+物业费按月查询")
             .get("${ENV(api_url)}/assets/income/monthly")
             .with_params(
                 **{
@@ -45,9 +71,55 @@ class TestCaseIncomeMonthly(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body[7].costAmount", 0)
+            .assert_equal("body[7].incomeAmount", 98.12)
+            .assert_equal("body[7].profitAmount", 98.12)
+            .assert_equal("body[8].costAmount", 135.5)
+            .assert_equal("body[8].incomeAmount", 3257.17)
+            .assert_equal("body[8].profitAmount", 3121.67)
         ),
         Step(
-            RunRequest("收益--按季查询")
+            RunRequest("收益--按月查询")
+            .get("${ENV(api_url)}/assets/income/monthly")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "MONTH",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[7].costAmount", 0)
+            .assert_equal("body[7].incomeAmount", 98.12)
+            .assert_equal("body[7].profitAmount", 98.12)
+            .assert_equal("body[8].costAmount", 135.5)
+            .assert_equal("body[8].incomeAmount", 3257.17)
+            .assert_equal("body[8].profitAmount", 3121.67)
+        ),
+        Step(
+            RunRequest("收益--租金、按季查询")
+            .get("${ENV(api_url)}/assets/income/monthly")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "QUARTER",
+                    "billTypes": "租金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", 100)
+            .assert_equal("body[2].incomeAmount", 3339.79)
+            .assert_equal("body[2].profitAmount", 3239.79)
+        ),
+        Step(
+            RunRequest("收益--租金+物业费、按季查询")
             .get("${ENV(api_url)}/assets/income/monthly")
             .with_params(
                 **{
@@ -61,9 +133,49 @@ class TestCaseIncomeMonthly(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", 135.5)
+            .assert_equal("body[2].incomeAmount", 3355.29)
+            .assert_equal("body[2].profitAmount", 3219.79)
         ),
         Step(
-            RunRequest("收益--按年查询")
+            RunRequest("收益--按季查询")
+            .get("${ENV(api_url)}/assets/income/monthly")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "QUARTER",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[2].costAmount", 135.5)
+            .assert_equal("body[2].incomeAmount", 3355.29)
+            .assert_equal("body[2].profitAmount", 3219.79)
+        ),
+        Step(
+            RunRequest("收益--租金、按年查询")
+            .get("${ENV(api_url)}/assets/income/monthly")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "YEAR",
+                    "billTypes": "租金",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", 100)
+            .assert_equal("body[0].incomeAmount", 3339.79)
+            .assert_equal("body[0].profitAmount", 3239.79)
+        ),
+        Step(
+            RunRequest("收益--租金+物业费、按年查询")
             .get("${ENV(api_url)}/assets/income/monthly")
             .with_params(
                 **{
@@ -77,6 +189,39 @@ class TestCaseIncomeMonthly(HttpRunner):
             .with_headers(**{"authorization": "Bearer $access_token"})
             .validate()
             .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", 135.5)
+            .assert_equal("body[0].incomeAmount", 3355.29)
+            .assert_equal("body[0].profitAmount", 3219.79)
+        ),
+        Step(
+            RunRequest("收益--按年查询")
+            .get("${ENV(api_url)}/assets/income/monthly")
+            .with_params(
+                **{
+                    "buildingIds": "$building_id",
+                    "endDate": "$endDate",
+                    "startDate": "$startDate",
+                    "temporalUnit": "YEAR",
+                }
+            )
+            .with_headers(**{"authorization": "Bearer $access_token"})
+            .validate()
+            .assert_equal("status_code", 200)
+            .assert_equal("body[0].costAmount", 135.5)
+            .assert_equal("body[0].incomeAmount", 3355.29)
+            .assert_equal("body[0].profitAmount", 3219.79)
+        ),
+        Step(
+            RunRequest("删除楼宇")
+            .delete("${ENV(api_url)}/buildings/$building_id")
+            .with_headers(
+                **{
+                    "authorization": "Bearer $access_token",
+                    "content-type": "application/json; charset=utf-8",
+                }
+            )
+            .validate()
+            .assert_equal("status_code", 204)
         ),
     ]
 
