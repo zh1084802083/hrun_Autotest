@@ -101,6 +101,21 @@ teststeps:
     teardown_hooks:
         - ${wait(1)}
 
+-   name: 获取工位类型房源中的工位
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        url: ${ENV(api_url)}/buildings/room/$cubicle_room_id/cubicles
+    extract:
+        - cubicleId_1: body.0.id
+        - cubicleId_2: body.1.id
+        - cubicleId_3: body.2.id
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
 -   name: 生成房源合同租金明细
     request:
         headers:
@@ -223,7 +238,7 @@ teststeps:
         - status_code
         - 201
 
--   name: 提交合同
+-   name: 提交房源合同
     setup_hooks:
         - ${set_contract_sh()}
     request:
@@ -240,7 +255,150 @@ teststeps:
         method: POST
         url: ${ENV(api_url)}/oa/start
     teardown_hooks:
-        - ${wait(1)}
+        - ${wait(2)}
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 生成工位合同租金明细
+    request:
+        headers:
+            authorization: Bearer $access_token
+        json:
+            baseTerm:
+                areaSize: 3
+                calculateOrder: AREA_FIRST
+                deposit: 1
+                depositPayEnumDesc: 租金保证金
+                depositUnitEnum: MONTH
+                leaseBeginDate: '2021-09-01'
+                leaseEndDate: '2021-09-30'
+                monetaryUnit: 人民币CNY
+                precisionEnum: RESULT
+                signDate: '2021-09-01'
+                spaceUnit: G
+                theoryRounded: false
+                unitPricePrecision: 2
+            depositIncreasingRates: []
+            discounts: []
+            increasingRates: []
+            leaseTerms:
+            -   calculateEnum: MONTH
+                dayNumberForYear: 365
+                deposit: false
+                intervalMonth: 1
+                leaseComputeWay: FIXED_MONEY
+                leaseDivideRoleEnum: NORMAL
+                leaseTermType: RENT
+                leaseTermTypeDesc: 租金
+                monetaryUnit: 人民币CNY
+                payInAdvanceDay: 1
+                paymentDateEnum: WORKDAY
+                price: 10
+                priceUnitEnum: GD
+                termBeginDate: '2021-09-01'
+                termEndDate: '2021-09-30'
+        method: POST
+        url: ${ENV(api_url)}/v2/contracts/pays
+    extract:
+        - contract_cubiclePays: body
+    validate:
+    -   eq:
+        - status_code
+        - 200
+
+-   name: 新建工位合同--按工位数计算租金(不付款)
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        json:
+            baseTerm:
+                areaSize: 3
+                calculateOrder: AREA_FIRST
+                contractNo: '001'
+                leaseBeginDate: '2021-09-01'
+                leaseEndDate: '2021-09-30'
+                precisionEnum: RESULT
+                signDate: '2021-09-01'
+                spaceUnit: G
+                theoryRounded: false
+                unitPricePrecision: 2
+            contractNo: '001'
+            customKeywords: []
+            expenseTerms:
+            -   areaSize: 3
+                buildingType: OFFICE
+                contractExpenseTermName: 租赁条款
+                contractPays: $contract_cubiclePays
+                deposit: 1
+                depositIncreasingRates: []
+                depositUnitEnum: MONTH
+                discounts: []
+                expenseTermType: RENT_TERM
+                increasingRates: []
+                itemPermission: RENT_PERMISSION
+                leaseTerms:
+                -   calculateEnum: MONTH
+                    dayNumberForYear: 365
+                    deposit: false
+                    intervalMonth: 1
+                    leaseComputeWay: FIXED_MONEY
+                    leaseDivideRoleEnum: NORMAL
+                    leaseTermType: RENT
+                    leaseTermTypeDesc: 租金
+                    monetaryUnit: 人民币CNY
+                    payInAdvanceDay: 1
+                    paymentDateEnum: WORKDAY
+                    price: 10
+                    priceUnitEnum: GD
+                    termBeginDate: '2021-09-01'
+                    termEndDate: '2021-09-30'
+                monetaryUnit: 人民币CNY
+                resourceIds: [$cubicleId_1, $cubicleId_2, $cubicleId_3]
+                resourceType: CUBICLE
+                spaceUnit: G
+                termIndex: 1
+            followId: 4990
+            followName: '13787340624'
+            jsonData: '[]'
+            legalPerson:
+                name: 李传根
+            remarkTerms: []
+            resourceIds: [$cubicleId_1, $cubicleId_2, $cubicleId_3]
+            resourceType: CUBICLE
+            tags: []
+            tenantId: 78327
+            tenantName: 湖南神雀网络科技有限公司
+            tenantNo: null
+        method: POST
+        url: ${ENV(api_url)}/v3/contracts?
+    extract:
+        - contract_cubicleId: content
+    validate:
+    -   eq:
+        - status_code
+        - 201
+
+-   name: 提交工位合同
+    setup_hooks:
+        - ${set_contract_sh()}
+    request:
+        headers:
+            accept: application/json
+            authorization: Bearer $access_token
+        json:
+            buildingIds: [$building_id]
+            subDomainType: "NEW_APPROVAL"
+            domainType: "CONTRACT"
+            customerId: 1013
+            description: "湖南神雀网络科技有限公司/自动化测试楼宇/201"
+            objectId: $contract_cubicleId
+        method: POST
+        url: ${ENV(api_url)}/oa/start
+    teardown_hooks:
+        - ${wait(2)}
     validate:
     -   eq:
         - status_code
@@ -264,11 +422,8 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body.7.data
-        - 0.02
-    -   eq:
         - body.8.data
-        - 0.51
+        - 0.46
 
 -   name: 数据舱-平效-房源-租金+物业费、按月
     request:
@@ -288,11 +443,8 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body.7.data
-        - 0.02
-    -   eq:
         - body.8.data
-        - 0.51
+        - 0.46
 
 -   name: 数据舱-平效-房源-按月
     request:
@@ -311,11 +463,8 @@ teststeps:
         - status_code
         - 200
     -   eq:
-        - body.7.data
-        - 0.02
-    -   eq:
         - body.8.data
-        - 0.51
+        - 0.46
 
 -   name: 数据舱-平效-工位-租金、按月
     request:
@@ -334,8 +483,52 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.8.data
+        - 6.08
 
--   name: 数据舱-平效-房源+工位-按月
+-   name: 数据舱-平效-工位-租金+物业费、按月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.data
+        - 6.08
+
+-   name: 数据舱-平效-工位、按月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.data
+        - 6.08
+
+-   name: 数据舱-平效-房源+工位-租金-按月
     request:
         headers:
             authorization: Bearer $access_token
@@ -352,6 +545,92 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.8.data
+        - 0.49
+
+-   name: 数据舱-平效-房源+工位-租金+物业费-按月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.data
+        - 0.49
+
+-   name: 数据舱-平效-房源+工位-按月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.data
+        - 0.49
+
+-   name: 数据舱-平效-房源-租金-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 0.15
+
+-   name: 数据舱-平效-房源-租金+物业费-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 0.15
 
 -   name: 数据舱-平效-房源-按季
     request:
@@ -361,7 +640,6 @@ teststeps:
         params:
             beginDate: $beginDate
             endDate: $endDate
-            billTypes: 租金
             buildingIds: $building_id
             statisticSpaceType: ROOM
             temporalUnit: QUARTER
@@ -370,6 +648,51 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.2.data
+        - 0.15
+
+-   name: 数据舱-平效-工位-租金-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 1.98
+
+-   name: 数据舱-平效-工位-租金+物业费-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 1.98
 
 -   name: 数据舱-平效-工位-按季
     request:
@@ -379,7 +702,6 @@ teststeps:
         params:
             beginDate: $beginDate
             endDate: $endDate
-            billTypes: 租金
             buildingIds: $building_id
             statisticSpaceType: CUBICLE
             temporalUnit: QUARTER
@@ -388,8 +710,11 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.2.data
+        - 1.98
 
--   name: 数据舱-平效-房源+工位-按季
+-   name: 数据舱-平效-房源+工位-租金-按季
     request:
         headers:
             authorization: Bearer $access_token
@@ -406,8 +731,53 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.2.data
+        - 0.16
 
--   name: 平效-房源(楼层)-年
+-   name: 数据舱-平效-房源+工位-租金+物业费-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 0.16
+
+-   name: 数据舱-平效-房源+工位-按季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 0.16
+
+-   name: 平效-房源-租金-年
     request:
         headers:
             authorization: Bearer $access_token
@@ -424,8 +794,52 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.0.data
+        - 0.04
 
--   name: 平效-工位-年
+-   name: 平效-房源-租金+物业费-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 0.04
+
+-   name: 平效-房源-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 0.04
+
+-   name: 平效-工位-租金-年
     request:
         headers:
             authorization: Bearer $access_token
@@ -442,8 +856,52 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.0.data
+        - 0.5
 
--   name: 平效-房源+工位-年
+-   name: 平效-工位-租金+物业费-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 0.5
+
+-   name: 平效-工位-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 0.5
+
+-   name: 平效-房源+工位-租金-年
     request:
         headers:
             authorization: Bearer $access_token
@@ -460,3 +918,59 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.0.data
+        - 0.04
+
+-   name: 平效-房源+工位-租金+物业费-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 0.04
+
+-   name: 平效-房源+工位-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/income-per-square
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 0.04
+
+-   name: 删除楼宇
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        method: DELETE
+        url: ${ENV(api_url)}/buildings/$building_id
+    validate:
+    -   eq:
+        - status_code
+        - 204
