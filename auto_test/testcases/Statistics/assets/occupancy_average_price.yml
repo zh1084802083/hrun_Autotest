@@ -1,5 +1,6 @@
 config:
     name: 数据舱-计租均价统计
+    verify: False
     variables:
         beginDate: '2021-01-01'
         endDate: '2021-12-31'
@@ -13,7 +14,7 @@ teststeps:
 -   name: 创建房源-1
     request:
         headers:
-            accept: application/json
+            content-type: application/json; charset=utf-8
             authorization: Bearer $access_token
         json:
             areaSize: 100
@@ -39,7 +40,7 @@ teststeps:
 -   name: 创建房源-2
     request:
         headers:
-            accept: application/json
+            content-type: application/json; charset=utf-8
             authorization: Bearer $access_token
         json:
             areaSize: 120.5
@@ -63,7 +64,7 @@ teststeps:
 -   name: 创建工位类型房源
     request:
         headers:
-            accept: application/json
+            content-type: application/json; charset=utf-8
             authorization: Bearer $access_token
         json:
             areaSize: 50.5
@@ -398,13 +399,13 @@ teststeps:
         method: POST
         url: ${ENV(api_url)}/oa/start
     teardown_hooks:
-        - ${wait(2)}
+        - ${wait(3)}
     validate:
     -   eq:
         - status_code
         - 200
 
--   name: 计租均价-房源-月
+-   name: 计租均价-房源-租金-月
     request:
         headers:
             authorization: Bearer $access_token
@@ -421,8 +422,32 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.8.data
+        - 1.01
 
--   name: 计租均价-工位-月
+-   name: 计租均价-房源-租金、物业费-月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.data
+        - 1.01
+
+-   name: 计租均价-工位-租金-月
     request:
         headers:
             authorization: Bearer $access_token
@@ -439,8 +464,32 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.8.data
+        - 10.14
 
--   name: 计租均价-房源+工位-月
+-   name: 计租均价-工位-租金、物业费-月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.data
+        - 10.14
+
+-   name: 计租均价-房源+工位-租金-月
     request:
         headers:
             authorization: Bearer $access_token
@@ -457,8 +506,32 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.8.data
+        - 1.01
 
--   name: 计租均价-房源-季
+-   name: 计租均价-房源+工位-租金、物业费-月
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: MONTH
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.8.data
+        - 1.01
+
+-   name: 计租均价-房源-租金-季
     request:
         headers:
             authorization: Bearer $access_token
@@ -475,8 +548,32 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.2.data
+        - 1.01
 
--   name: 计租均价-工位-季
+-   name: 计租均价-房源-租金、物业费-季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 1.01
+
+-   name: 计租均价-工位-租金-季
     request:
         headers:
             authorization: Bearer $access_token
@@ -493,8 +590,32 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.2.data
+        - 10.14
 
--   name: 计租均价-房源+工位-季
+-   name: 计租均价-工位-租金、物业费-季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 10.14
+
+-   name: 计租均价-房源+工位-租金-季
     request:
         headers:
             authorization: Bearer $access_token
@@ -511,8 +632,32 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.2.data
+        - 1.01
 
--   name: 计租均价-房源-年
+-   name: 计租均价-房源+工位-租金、物业费-季
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: QUARTER
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.2.data
+        - 1.01
+
+-   name: 计租均价-房源-租金-年
     request:
         headers:
             authorization: Bearer $access_token
@@ -529,8 +674,32 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.0.data
+        - 1.01
 
--   name: 计租均价-工位-年
+-   name: 计租均价-房源-租金、物业费-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ROOM
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 1.01
+
+-   name: 计租均价-工位-租金-年
     request:
         headers:
             authorization: Bearer $access_token
@@ -547,8 +716,32 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.0.data
+        - 10.14
 
--   name: 计租均价-房源+工位-年
+-   name: 计租均价-工位-租金、物业费-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: CUBICLE
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 10.14
+
+-   name: 计租均价-房源+工位-租金-年
     request:
         headers:
             authorization: Bearer $access_token
@@ -565,3 +758,39 @@ teststeps:
     -   eq:
         - status_code
         - 200
+    -   eq:
+        - body.0.data
+        - 1.01
+
+-   name: 计租均价-房源+工位-租金、物业费-年
+    request:
+        headers:
+            authorization: Bearer $access_token
+        method: GET
+        params:
+            beginDate: $beginDate
+            endDate: $endDate
+            billTypes: 租金,物业费
+            buildingIds: $building_id
+            statisticSpaceType: ALL
+            temporalUnit: YEAR
+        url: ${ENV(api_url)}/assets/occupancy-average-price
+    validate:
+    -   eq:
+        - status_code
+        - 200
+    -   eq:
+        - body.0.data
+        - 1.01
+
+-   name: 删除楼宇
+    request:
+        headers:
+            authorization: Bearer $access_token
+            content-type: application/json; charset=utf-8
+        method: DELETE
+        url: ${ENV(api_url)}/buildings/$building_id
+    validate:
+    -   eq:
+        - status_code
+        - 204

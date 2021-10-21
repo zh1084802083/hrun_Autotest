@@ -13,7 +13,7 @@ teststeps:
 -   name: 创建房源-1
     request:
         headers:
-            accept: application/json
+            content-type: application/json; charset=utf-8
             authorization: Bearer $access_token
         json:
             areaSize: 100
@@ -39,7 +39,7 @@ teststeps:
 -   name: 创建房源-2
     request:
         headers:
-            accept: application/json
+            content-type: application/json; charset=utf-8
             authorization: Bearer $access_token
         json:
             areaSize: 120.5
@@ -63,7 +63,7 @@ teststeps:
 -   name: 创建工位类型房源
     request:
         headers:
-            accept: application/json
+            content-type: application/json; charset=utf-8
             authorization: Bearer $access_token
         json:
             areaSize: 50.5
